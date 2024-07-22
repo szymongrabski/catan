@@ -22,21 +22,6 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void addNewUser(User user) {
-        Optional<User> usersByEmail = userRepository.findUserByEmail(user.getEmail());
-        Optional<User> usersByUsername = userRepository.findUserByUsername(user.getUsername());
-
-        if (usersByEmail.isPresent()) {
-            throw new IllegalStateException("User with email " + user.getEmail() + " already exists");
-        }
-
-        if (usersByUsername.isPresent()) {
-            throw new IllegalStateException("User with username " + user.getUsername() + " already exists");
-        }
-
-        userRepository.save(user);
-    }
-
     public void deleteUser(Long userId) {
         boolean exists = userRepository.existsById(userId);
 
