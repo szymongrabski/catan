@@ -5,8 +5,8 @@ import com.example.backend.user.Role;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +31,11 @@ public class AuthenticationService {
         Optional<User> usersByUsername = userRepository.findUserByUsername(registerRequest.getUsername());
 
         if (usersByEmail.isPresent()) {
-            throw new IllegalStateException("User with email " + registerRequest.getEmail() + " already exists");
+            throw new IllegalStateException("Email already in use");
         }
 
         if (usersByUsername.isPresent()) {
-            throw new IllegalStateException("User with username " + registerRequest.getUsername() + " already exists");
+            throw new IllegalStateException("Username already in use");
         }
 
         User user = new User(
@@ -50,17 +50,21 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getUsername(),
-                        authenticationRequest.getPassword()
-                )
-        );
+        User user = userRepository.findUserByUsername(authenticationRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
 
-        var user = userRepository.findUserByUsername(authenticationRequest.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getUsername(),
+                            authenticationRequest.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new RuntimeException("Invalid username or password");
+        }
 
-        var jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }
 }
