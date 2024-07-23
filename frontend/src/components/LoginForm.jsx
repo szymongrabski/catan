@@ -1,21 +1,26 @@
 import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
+import {useNavigate} from "react-router-dom";
+import {useState} from "react";
+
 import {login} from "../api/authentiactionService.js";
 
 function LoginForm() {
+    const navigate = useNavigate();
+    const [error, setError] = useState(null);
     const LoginSchema = Yup.object().shape({
         username: Yup.string().required("Required"),
         password: Yup.string().required('Required')
     });
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (values, { resetForm }) => {
         const { username, password } = values;
-        const success = await login(username, password);
+        const success = await login(username, password, setError);
 
         if (success) {
-            console.log('Zalogowano pomyślnie');
+            navigate('/home');
         } else {
-            console.error('Logowanie nieudane');
+            resetForm();
         }
     }
 
@@ -40,6 +45,7 @@ function LoginForm() {
                     </div>
 
                     <button type="submit">Submit</button>
+                    { error && <div>{error}</div> }
                 </Form>
             )}
         </Formik>
