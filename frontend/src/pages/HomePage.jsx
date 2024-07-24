@@ -1,11 +1,14 @@
 import {useNavigate} from "react-router-dom";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import UserSearch from "../components/UserSearch.jsx";
 
 function HomePage() {
     const navigate = useNavigate();
+    const [users, setUsers] = useState([]);
     const authToken = sessionStorage.getItem('authToken');
 
     useEffect(() => {
+
         if (!authToken) {
             navigate('/login');
         }
@@ -15,7 +18,7 @@ function HomePage() {
         <>
             <h1>Home</h1>
             <div>
-                <p>Find friends</p>
+                <UserSearch />
             </div>
         </>
     );

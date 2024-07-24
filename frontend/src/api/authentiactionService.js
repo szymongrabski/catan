@@ -6,8 +6,9 @@ export const login = async (username, password, setError) => {
     try {
         const response = await axios.post(`${API_URL}/authenticate`, { username, password });
 
-        const token = response.data.token;
+        const { token, userId } = response.data;
         sessionStorage.setItem('authToken', token);
+        sessionStorage.setItem('userId', userId);
 
         return true;
     } catch (error) {
@@ -20,17 +21,18 @@ export const login = async (username, password, setError) => {
 
 export const register = async (username, email, password, setError) => {
     try {
-        const response = await axios.post(API_URL + "/register", { username, email, password });
+        const response = await axios.post(`${API_URL}/register`, { username, email, password });
 
-        const token = response.data.token;
+        const { token, userId } = response.data;
 
         sessionStorage.setItem('authToken', token);
+        sessionStorage.setItem('userId', userId);
 
-        return true
+        return true;
     } catch (error) {
         const errorMessage = error.response?.data?.message || 'An error occurred';
 
         setError(errorMessage);
         return false;
     }
-}
+};
