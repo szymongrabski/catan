@@ -1,10 +1,10 @@
 import {useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import UserSearch from "../components/UserSearch.jsx";
+import FriendList from "../components/FriendList.jsx";
 
 function HomePage() {
     const navigate = useNavigate();
-    const [users, setUsers] = useState([]);
     const authToken = sessionStorage.getItem('authToken');
 
     useEffect(() => {
@@ -15,12 +15,13 @@ function HomePage() {
     }, [authToken]);
 
     return (
-        <>
+        <div className="test-container">
             <h1>Home</h1>
-            <div>
+            <div className="test">
+                <FriendList />
                 <UserSearch />
             </div>
-        </>
+        </div>
     );
 }
 

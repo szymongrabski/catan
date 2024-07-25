@@ -1,37 +1,30 @@
-import { useState, useEffect } from 'react';
-import fetchData from "../api/authenticatedApi.js";
+import { useState } from 'react';
+import { fetchUsers, sendInvitation } from "../api/authenticatedApi.js";
 
 const UserSearch = () => {
     const [username, setUsername] = useState('');
     const [users, setUsers] = useState([]);
     const [error, setError] = useState(null);
-    const [currentUserId, setCurrentUserId] = useState(null);
-
-    useEffect(() => {
-        const userId = sessionStorage.getItem('userId');
-        if (userId) {
-            setCurrentUserId(Number(userId)); // Upewnij się, że userId jest liczbą
-        } else {
-            console.error('No userId found in sessionStorage');
-        }
-    }, []);
 
     const handleSearch = async (event) => {
         event.preventDefault();
         setError(null);
 
-        if (currentUserId === null) {
-            setError('User ID not found');
-            return;
-        }
-
         try {
-            const endpoint = `user/search?username=${encodeURIComponent(username)}&currentUserId=${currentUserId}`;
-            const userData = await fetchData(endpoint);
+            const userData = await fetchUsers(username)
             setUsers(userData);
         } catch (err) {
             setError('Error fetching users');
-            console.error('Error:', err);
+        }
+    };
+
+    const handleInvite = async (userId) => {
+        await sendInvitation(userId);
+        try {
+            const userData = await fetchUsers(username)
+            setUsers(userData);
+        } catch (err) {
+            setError('Error fetching users');
         }
     };
 
@@ -48,7 +41,7 @@ const UserSearch = () => {
                 <button type="submit">Search</button>
             </form>
 
-            <h2>Search Results:</h2>
+            <h5>Search Results:</h5>
             {error && <p>{error}</p>}
             <ul>
                 {users.map((user) => (
@@ -57,13 +50,13 @@ const UserSearch = () => {
                             <p>{user.username}</p>
                             <div>
                                 {user.friendship_status === 'NONE' && (
-                                    <button>
+                                    <button onClick={() => handleInvite(user.userid)}>
                                         Send request
                                     </button>
                                 )}
                                 {user.friendship_status === 'PENDING' && (
-                                    <button>
-                                        Cancel request
+                                    <button disabled>
+                                        Pending
                                     </button>
                                 )}
                                 {user.friendship_status === 'ACCEPTED' && (

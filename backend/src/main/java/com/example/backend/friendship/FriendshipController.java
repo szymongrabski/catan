@@ -1,5 +1,6 @@
 package com.example.backend.friendship;
 
+import com.example.backend.user.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,5 +28,10 @@ public class FriendshipController {
     @GetMapping("/requests")
     public List<Friendship> getUserFriendRequests(@RequestParam Long userId) {
         return friendshipService.getUserFriendRequests();
+    }
+
+    @GetMapping()
+    public List<User> getFriends() {
+        return friendshipService.getFriends();
     }
 }

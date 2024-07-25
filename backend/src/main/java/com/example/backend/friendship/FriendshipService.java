@@ -6,7 +6,10 @@ import com.example.backend.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FriendshipService {
@@ -58,5 +61,18 @@ public class FriendshipService {
         User user = userService.getCurrentUser();
 
         return friendshipRepository.findByRequesterOrReceiver(user, user);
+    }
+
+    public List<User> getFriends() {
+        Long userId = userService.getCurrentUserId();
+        List<Friendship> requesterFriendships = friendshipRepository.findByRequesterIdAndStatus(userId, FriendshipStatus.ACCEPTED);
+
+        List<Friendship> receiverFriendships = friendshipRepository.findByReceiverIdAndStatus(userId, FriendshipStatus.ACCEPTED);
+
+        Set<User> friends = new HashSet<>();
+        friends.addAll(requesterFriendships.stream().map(Friendship::getReceiver).toList());
+        friends.addAll(receiverFriendships.stream().map(Friendship::getRequester).toList());
+
+        return new ArrayList<>(friends);
     }
 }

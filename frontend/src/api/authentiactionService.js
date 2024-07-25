@@ -6,9 +6,8 @@ export const login = async (username, password, setError) => {
     try {
         const response = await axios.post(`${API_URL}/authenticate`, { username, password });
 
-        const { token, userId } = response.data;
+        const { token } = response.data;
         sessionStorage.setItem('authToken', token);
-        sessionStorage.setItem('userId', userId);
 
         return true;
     } catch (error) {
@@ -23,10 +22,9 @@ export const register = async (username, email, password, setError) => {
     try {
         const response = await axios.post(`${API_URL}/register`, { username, email, password });
 
-        const { token, userId } = response.data;
+        const { token } = response.data;
 
         sessionStorage.setItem('authToken', token);
-        sessionStorage.setItem('userId', userId);
 
         return true;
     } catch (error) {
