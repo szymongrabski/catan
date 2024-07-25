@@ -1,6 +1,9 @@
 package com.example.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +27,28 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public List<User> searchUsersByUsername(String username) {
-        return userRepository.findByUsernameContaining(username);
+
+    public Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            String currentUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+            User currentUser = userRepository.findUserByUsername(currentUsername)
+                    .orElseThrow(() -> new IllegalStateException("User not found"));
+            return currentUser.getId();
+        } else {
+            throw new RuntimeException("User not authenticated");
+        }
+    }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            String currentUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+            return userRepository.findUserByUsername(currentUsername)
+                    .orElseThrow(() -> new IllegalStateException("User not found"));
+        } else {
+            throw new RuntimeException("User not authenticated");
+        }
     }
 
     public void deleteUser(Long userId) {

@@ -2,6 +2,7 @@ package com.example.backend.friendship;
 
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
+import com.example.backend.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -11,16 +12,17 @@ import java.util.List;
 public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public FriendshipService(FriendshipRepository friendshipRepository, UserRepository userRepository) {
+    public FriendshipService(FriendshipRepository friendshipRepository, UserRepository userRepository, UserService userService) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Transactional
-    public void sendFriendRequest(Long requesterId, Long receiverId) {
-        User requester = userRepository.findById(requesterId)
-                .orElseThrow(() -> new RuntimeException("Requester not found"));
+    public void sendFriendRequest(Long receiverId) {
+        User requester = userService.getCurrentUser();
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
@@ -36,9 +38,8 @@ public class FriendshipService {
     }
 
     @Transactional
-    public void respondToFriendRequest(Long requesterId, Long receiverId, boolean accept) {
-        User requester = userRepository.findById(requesterId)
-                .orElseThrow(() -> new RuntimeException("Requester not found"));
+    public void respondToFriendRequest(Long receiverId, boolean accept) {
+        User requester = userService.getCurrentUser();
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
@@ -53,9 +54,8 @@ public class FriendshipService {
         }
     }
 
-    public List<Friendship> getUserFriendRequests(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<Friendship> getUserFriendRequests() {
+        User user = userService.getCurrentUser();
 
         return friendshipRepository.findByRequesterOrReceiver(user, user);
     }

@@ -15,17 +15,17 @@ public class FriendshipController {
     }
 
     @PostMapping("/send")
-    public void sendFriendRequest(@RequestParam Long requesterId, @RequestParam Long receiverId) {
-        friendshipService.sendFriendRequest(requesterId, receiverId);
+    public void sendFriendRequest(@RequestParam Long receiverId) {
+        friendshipService.sendFriendRequest(receiverId);
     }
 
     @PostMapping("/respond")
-    public void respondToFriendRequest(@RequestParam Long requesterId, @RequestParam Long receiverId, @RequestParam boolean accept) {
-        friendshipService.respondToFriendRequest(requesterId, receiverId, accept);
+    public void respondToFriendRequest(@RequestParam Long receiverId, @RequestParam boolean accept) {
+        friendshipService.respondToFriendRequest(receiverId, accept);
     }
 
     @GetMapping("/requests")
     public List<Friendship> getUserFriendRequests(@RequestParam Long userId) {
-        return friendshipService.getUserFriendRequests(userId);
+        return friendshipService.getUserFriendRequests();
     }
 }
