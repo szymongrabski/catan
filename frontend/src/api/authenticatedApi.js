@@ -58,3 +58,31 @@ export async function sendInvitation(receiverId) {
         throw error;
     }
 }
+
+export async function respondToInvitation(requesterId, accept) {
+    const authToken = sessionStorage.getItem('authToken');
+
+    if (!authToken) {
+        console.error('No authentication token found');
+        throw new Error('Authentication token is missing');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    };
+
+    try {
+        const response = await axios.post(`${API_URL}/friends/respond`, null,  {
+            ...config,
+            params: {
+                requesterId,
+                accept
+            }
+        });
+    } catch (error) {
+        console.error('Error responding to an invitation:', error);
+        throw error;
+    }
+}

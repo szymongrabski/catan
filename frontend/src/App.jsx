@@ -1,4 +1,4 @@
-import './App.css'
+import './assets/styles/main.scss';
 import {
     BrowserRouter as Router, Navigate, Route, Routes
 } from "react-router-dom";

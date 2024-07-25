@@ -23,6 +23,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public UserDTO convertToUserDTO(User user) {
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail());
+    }
+
+    public List<UserDTO> convertToUserDTOList(List<User> users) {
+        return users.stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<User> getUsers() {
         return userRepository.findAll();
     }

@@ -31,17 +31,17 @@ function LoginForm() {
             onSubmit={handleSubmit}
         >
             {({ errors, touched }) => (
-                <Form>
-                    <div>
+                <Form className="form">
+                    <div className="field-container">
                         <label htmlFor="username">Username</label>
                         <Field name="username" type="text" id="username" />
-                        {errors.username && touched.username ? <div>{errors.username}</div> : null}
+                        {errors.username && touched.username ? <div className="error">{errors.username}</div> : null}
                     </div>
 
-                    <div>
+                    <div className="field-container">
                         <label htmlFor="password">Password</label>
                         <Field name="password" type="password" id="password" />
-                        {errors.password && touched.password ? <div>{errors.password}</div> : null}
+                        {errors.password && touched.password ? <div className="error">{errors.password}</div> : null}
                     </div>
 
                     <button type="submit">Submit</button>

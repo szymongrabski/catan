@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FriendshipService {
@@ -41,10 +42,10 @@ public class FriendshipService {
     }
 
     @Transactional
-    public void respondToFriendRequest(Long receiverId, boolean accept) {
-        User requester = userService.getCurrentUser();
-        User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+    public void respondToFriendRequest(Long requesterId, boolean accept) {
+        User receiver = userService.getCurrentUser();
+        User requester = userRepository.findById(requesterId)
+                .orElseThrow(() -> new RuntimeException("Requester not found"));
 
         Friendship friendship = friendshipRepository.findByRequesterAndReceiver(requester, receiver)
                 .orElseThrow(() -> new RuntimeException("Friend request not found"));
@@ -57,10 +58,13 @@ public class FriendshipService {
         }
     }
 
-    public List<Friendship> getUserFriendRequests() {
+    public List<User> getUserFriendRequests() {
         User user = userService.getCurrentUser();
+        List<Friendship> friendships = friendshipRepository.findByReceiverIdAndStatus(user.getId(), FriendshipStatus.PENDING);
 
-        return friendshipRepository.findByRequesterOrReceiver(user, user);
+        return friendships.stream()
+                .map(Friendship::getRequester)
+                .collect(Collectors.toList());
     }
 
     public List<User> getFriends() {

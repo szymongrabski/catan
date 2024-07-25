@@ -1,0 +1,104 @@
+@import 'variables';
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.logo {
+  width: 10rem;
+}
+
+.page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 80%;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.form-title {
+  font-size: 1.5rem;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  label {
+    text-align: left;
+  }
+}
+
+.circle {
+  height: 150px;
+  width: 150px;
+  border-radius: 50%;
+  background-color: lightblue;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+}
+
+.error {
+  font-size: small;
+  color: $error-color;
+}
+
+
+.home-page {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+
+.friend-requests {
+  display: flex;
+  align-items: center;
+  gap: 1em
+}
+
+.count-circle {
+  background-color: orange;
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: red;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+.list-element {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  list-style: none;
+  gap: 1em;
+}

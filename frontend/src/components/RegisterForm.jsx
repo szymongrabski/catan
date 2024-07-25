@@ -35,33 +35,33 @@ function RegisterForm() {
             onSubmit={handleSubmit}
         >
             {({ errors, touched }) => (
-                <Form>
-                    <div>
+                <Form className="form">
+                    <div className="field-container">
                         <label htmlFor="username">Username</label>
                         <Field name="username" type="text" id="username" />
-                        {errors.username && touched.username ? <div>{errors.username}</div> : null}
+                        {errors.username && touched.username ? <div className="error">{errors.username}</div> : null}
                     </div>
 
-                    <div>
+                    <div className="field-container">
                         <label htmlFor="email">Email</label>
                         <Field name="email" type="email" id="email" />
-                        {errors.email && touched.email ? <div>{errors.email}</div> : null}
+                        {errors.email && touched.email ? <div className="error">{errors.email}</div> : null}
                     </div>
 
-                    <div>
+                    <div className="field-container">
                         <label htmlFor="password">Password</label>
                         <Field name="password" type="password" id="password" />
-                        {errors.password && touched.password ? <div>{errors.password}</div> : null}
+                        {errors.password && touched.password ? <div className="error">{errors.password}</div> : null}
                     </div>
 
-                    <div>
+                    <div className="field-container">
                         <label htmlFor="confirmPassword">Confirm Password</label>
                         <Field name="confirmPassword" type="password" id="confirmPassword" />
-                        {errors.confirmPassword && touched.confirmPassword ? <div>{errors.confirmPassword}</div> : null}
+                        {errors.confirmPassword && touched.confirmPassword ? <div className="error">{errors.confirmPassword}</div> : null}
                     </div>
 
                     <button type="submit">Submit</button>
-                    { error && <div>{error}</div> }
+                    { error && <div className="error">{error}</div> }
                 </Form>
             )}
         </Formik>
