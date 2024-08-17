@@ -10,8 +10,14 @@ const UserSearch = () => {
         event.preventDefault();
         setError(null);
 
+        if (username.trim().length < 4) {
+            setError('Username must be at least 4 characters long');
+            setUsers([]);
+            return;
+        }
+
         try {
-            const userData = await fetchUsers(username)
+            const userData = await fetchUsers(username);
             setUsers(userData);
         } catch (err) {
             setError('Error fetching users');
@@ -21,11 +27,17 @@ const UserSearch = () => {
     const handleInvite = async (userId) => {
         await sendInvitation(userId);
         try {
-            const userData = await fetchUsers(username)
+            const userData = await fetchUsers(username);
             setUsers(userData);
         } catch (err) {
             setError('Error fetching users');
         }
+    };
+
+    const handleClear = () => {
+        setUsername('');
+        setUsers([]);
+        setError(null);
     };
 
     return (
@@ -39,32 +51,35 @@ const UserSearch = () => {
                     placeholder="Enter username"
                 />
                 <button type="submit">Search</button>
+                {error || users.length > 0 ? (
+                    <button type="button" onClick={handleClear}>
+                        Clear
+                    </button>
+                ) : null}
             </form>
 
             <h5>Search Results:</h5>
-            {error && <p>{error}</p>}
+            {error && <p className="error">{error}</p>}
             <ul>
                 {users.map((user) => (
-                    <li key={user.userid}>
+                    <li key={user.userid} className="list-element">
+                        <p>{user.username}</p>
                         <div>
-                            <p>{user.username}</p>
-                            <div>
-                                {user.friendship_status === 'NONE' && (
-                                    <button onClick={() => handleInvite(user.userid)}>
-                                        Send request
-                                    </button>
-                                )}
-                                {user.friendship_status === 'PENDING' && (
-                                    <button disabled>
-                                        Pending
-                                    </button>
-                                )}
-                                {user.friendship_status === 'ACCEPTED' && (
-                                    <button disabled>
-                                        Friends
-                                    </button>
-                                )}
-                            </div>
+                            {user.friendship_status === 'NONE' && (
+                                <button onClick={() => handleInvite(user.userid)}>
+                                    Send request
+                                </button>
+                            )}
+                            {user.friendship_status === 'PENDING' && (
+                                <button disabled>
+                                    Pending
+                                </button>
+                            )}
+                            {user.friendship_status === 'ACCEPTED' && (
+                                <button disabled>
+                                    Friends
+                                </button>
+                            )}
                         </div>
                     </li>
                 ))}

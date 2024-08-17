@@ -86,3 +86,105 @@ export async function respondToInvitation(requesterId, accept) {
         throw error;
     }
 }
+
+
+export async function deleteFriendship(friendId) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        await axios.delete(`${API_URL}/friends/delete`, {
+            ...config,
+            params: {
+                friendId,
+            }
+        });
+    } catch (error) {
+        console.error('Error responding to an invitation:', error);
+        throw error;
+    }
+}
+
+export async function createGame() {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/create`, null,  config)
+        return response.data;
+    } catch (error) {
+        console.error('Error creating game:', error);
+        throw error;
+    }
+}
+
+export async function sendGameInvitation(gameId, friendId) {
+    const authToken = sessionStorage.getItem('authToken');
+
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/invitation/send`, null,  {
+            ...config,
+            params: {
+                gameId,
+                friendId
+            }
+        })
+        return response.data;
+    } catch (error) {
+        console.error('Error sending invitation to game:', error);
+        throw error;
+    }
+}
+
+export async function respondToGameInvitation(invitationId, accept) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/invitation/respond`, null,  {
+            ...config,
+            params: {
+                invitationId,
+                accept
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error responding to an invitation:', error);
+        throw error;
+    }
+}

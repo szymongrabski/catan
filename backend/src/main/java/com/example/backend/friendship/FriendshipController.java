@@ -29,6 +29,11 @@ public class FriendshipController {
         friendshipService.respondToFriendRequest(requesterId, accept);
     }
 
+    @DeleteMapping("/delete")
+    public void deleteFriendship(@RequestParam Long friendId) {
+        friendshipService.deleteFriendship(friendId);
+    }
+
     @GetMapping("/requests")
     public List<UserDTO> getUserFriendRequests() {
         List<User> requests = friendshipService.getUserFriendRequests();

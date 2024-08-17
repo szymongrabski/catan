@@ -58,6 +58,25 @@ public class FriendshipService {
         }
     }
 
+    @Transactional
+    public void deleteFriendship(Long friendId) {
+        User user = userService.getCurrentUser();
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found"));
+
+        Friendship friendship = friendshipRepository.findByRequesterAndReceiver(user, friend)
+                .stream()
+                .findFirst()
+                .orElseGet(() -> friendshipRepository.findByRequesterAndReceiver(friend, user)
+                        .stream()
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Friendship not found"))
+                );
+
+        friendshipRepository.delete(friendship);
+    }
+
+
     public List<User> getUserFriendRequests() {
         User user = userService.getCurrentUser();
         List<Friendship> friendships = friendshipRepository.findByReceiverIdAndStatus(user.getId(), FriendshipStatus.PENDING);

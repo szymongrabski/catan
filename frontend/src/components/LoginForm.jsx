@@ -45,7 +45,9 @@ function LoginForm() {
                     </div>
 
                     <button type="submit">Submit</button>
-                    { error && <div>{error}</div> }
+                    <div>
+                        { error && <div className="error">{error}</div> }
+                    </div>
                 </Form>
             )}
         </Formik>

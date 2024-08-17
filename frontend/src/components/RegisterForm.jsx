@@ -9,7 +9,7 @@ function RegisterForm() {
     const [error, setError] = useState(null);
 
     const RegisterSchema = Yup.object().shape({
-        username: Yup.string().required("Required"),
+        username: Yup.string().required("Required").min(4, "Username must be at least 4 characters"),
         email: Yup.string().email("Invalid email address").required("Required"),
         password: Yup.string().required('Required').min(6, 'Password must be at least 6 characters'),
         confirmPassword: Yup.string()

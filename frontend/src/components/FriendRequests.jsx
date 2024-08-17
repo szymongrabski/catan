@@ -1,26 +1,16 @@
-import { useEffect, useState } from "react";
-import {fetchData, respondToInvitation} from "../api/authenticatedApi.js";
+import { useState } from "react";
+import { respondToInvitation } from "../api/authenticatedApi.js";
+import { useUser } from "../context/UserContext.jsx";
 
 const FriendsRequests = () => {
-    const [friendRequests, setFriendsRequests] = useState([]);
+    const { friendRequests, fetchFriends, fetchFriendRequests } = useUser();
     const [isHovered, setHovered] = useState(false);
-
-    const fetchFriendRequests = async () => {
-        try {
-            const response = await fetchData('friends/requests');
-            setFriendsRequests(response);
-        } catch (err) {
-            console.error('Error fetching friends:', err);
-        }
-    };
 
     async function handleClick(requesterId, accept) {
         await respondToInvitation(requesterId, accept);
         fetchFriendRequests();
+        fetchFriends();
     }
-    useEffect(() => {
-        fetchFriendRequests();
-    }, []);
 
     return (
         <>
@@ -38,9 +28,13 @@ const FriendsRequests = () => {
                             {
                                 friendRequests.map((friend) => (
                                 <li key={friend.id} className="list-element">
-                                    <p>{friend.username}</p>
-                                    <button onClick={() => handleClick(friend.id, true)}>Accept</button>
-                                    <button onClick={() => handleClick(friend.id, false)}>Decline</button>
+                                    <div>{friend.username}</div>
+                                    <div>
+                                        <button onClick={() => handleClick(friend.id, true)}>Accept</button>
+                                    </div>
+                                    <div>
+                                        <button onClick={() => handleClick(friend.id, false)}>Decline</button>
+                                    </div>
                                 </li>
                                 ))
                             }
