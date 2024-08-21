@@ -3,7 +3,9 @@ package com.example.backend.friendship;
 import com.example.backend.user.User;
 import com.example.backend.user.UserRepository;
 import com.example.backend.user.UserService;
+import com.example.backend.websocket.NotificationsWebSocketHandler;
 import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,11 +19,13 @@ public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final NotificationsWebSocketHandler webSocketHandler;
 
-    public FriendshipService(FriendshipRepository friendshipRepository, UserRepository userRepository, UserService userService) {
+    public FriendshipService(FriendshipRepository friendshipRepository, UserRepository userRepository, UserService userService, NotificationsWebSocketHandler webSocketHandler) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.webSocketHandler = webSocketHandler;
     }
 
     @Transactional
@@ -36,6 +40,7 @@ public class FriendshipService {
             friendship.setReceiver(receiver);
             friendship.setStatus(FriendshipStatus.PENDING);
             friendshipRepository.save(friendship);
+            webSocketHandler.notifyUserAboutFriendRequest(receiverId);
         } else {
             throw new RuntimeException("Friend request already sent");
         }
@@ -56,6 +61,8 @@ public class FriendshipService {
         } else {
             friendshipRepository.delete(friendship);
         }
+
+        webSocketHandler.notifyUserAboutFetchingFriends(requester.getId());
     }
 
     @Transactional
@@ -74,6 +81,7 @@ public class FriendshipService {
                 );
 
         friendshipRepository.delete(friendship);
+        webSocketHandler.notifyUserAboutFetchingFriends(friendId);
     }
 
 

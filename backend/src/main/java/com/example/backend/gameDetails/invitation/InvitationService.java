@@ -44,13 +44,13 @@ public class InvitationService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid game ID"));
 
         User sender = userService.getCurrentUser();
-        UserDTO senderDTO = userService.convertToUserDTO(sender);
 
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid friend ID"));
-        UserDTO friendDTO = userService.convertToUserDTO(friend);
-        Invitation invitation = new Invitation(game, sender, friend);
 
+        invitationRepository.deleteByGameAndSenderAndReceiver(game, sender, friend);
+
+        Invitation invitation = new Invitation(game, sender, friend);
         invitationRepository.save(invitation);
     }
 

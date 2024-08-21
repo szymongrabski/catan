@@ -25,7 +25,7 @@ const PlayersList = ({ gameId }) => {
                 ) : (
                     players.map((player) => (
                         <li key={player.id} className="list-element">
-                            <p>{player.id}</p>
+                            <p>{player.user.username}</p>
                         </li>
                     ))
                 )}

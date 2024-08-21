@@ -33,8 +33,9 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public UserDTO getUser() {
+        User user = getCurrentUser();
+        return convertToUserDTO(user);
     }
 
 

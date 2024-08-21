@@ -33,6 +33,10 @@ public class GameService {
     }
 
     public void addPlayerToGame(Game game, User user) {
+        if (playerRepository.existsByGameAndUser(game, user)) {
+            throw new IllegalArgumentException("User is already in the game");
+        }
+
         Player player = new Player();
         player.setUser(user);
         player.setGame(game);
@@ -48,6 +52,4 @@ public class GameService {
                 .map(player -> new PlayerDTO(player.getId(), player.getPoints(), userService.convertToUserDTO(player.getUser())))
                 .collect(Collectors.toList());
     }
-
-
 }

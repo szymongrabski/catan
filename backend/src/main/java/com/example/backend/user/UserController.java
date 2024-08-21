@@ -20,8 +20,8 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        return userService.getUsers();
+    public UserDTO getUser() {
+        return userService.getUser();
     }
 
     @GetMapping("/search")
