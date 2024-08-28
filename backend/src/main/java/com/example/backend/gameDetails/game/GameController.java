@@ -1,5 +1,6 @@
 package com.example.backend.gameDetails.game;
 
+import com.example.backend.gameDetails.board.Board;
 import com.example.backend.gameDetails.player.PlayerDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,5 +25,15 @@ public class GameController {
     @GetMapping("/{gameId}/players")
     public List<PlayerDTO> getPlayersForGame(@PathVariable Long gameId) {
         return gameService.getPlayersForGame(gameId);
+    }
+
+    @GetMapping("/{gameId}/player")
+    public PlayerDTO getPlayerForGame(@PathVariable Long gameId) {
+        return gameService.getPlayer(gameId);
+    }
+
+    @GetMapping("/{gameId}/board")
+    public Board getBoardForGame(@PathVariable Long gameId) {
+        return gameService.getBoard(gameId);
     }
 }

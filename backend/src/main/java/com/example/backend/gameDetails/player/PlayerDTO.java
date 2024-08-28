@@ -7,13 +7,15 @@ public class PlayerDTO {
     private Long id;
     private int points;
     private UserDTO user;
+    private PlayerRole role;
 
     public PlayerDTO() {}
 
-    public PlayerDTO(Long id, int points, UserDTO user) {
+    public PlayerDTO(Long id, int points, PlayerRole role,  UserDTO user) {
         this.id = id;
         this.points = points;
         this.user = user;
+        this.role = role;
     }
 
     public Long getId() {
@@ -38,5 +40,13 @@ public class PlayerDTO {
 
     public void setUser(UserDTO user) {
         this.user = user;
+    }
+
+    public PlayerRole getRole() {
+        return role;
+    }
+
+    public void setRole(PlayerRole role) {
+        this.role = role;
     }
 }

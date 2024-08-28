@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import {fetchData, respondToGameInvitation} from "../api/authenticatedApi.js";
 import {useNavigate} from "react-router-dom";
+import {useUser} from "../context/UserContext.jsx";
 
 const GameInvitations = () => {
     const navigate = useNavigate();
     const [isHovered, setHovered] = useState(false);
-    const [gameInvitations, setGameInvitations] = useState([]);
+    const { gameInvitations } = useUser()
 
     async function handleClick(invitationId, accept) {
         const response = await respondToGameInvitation(invitationId, accept);
@@ -13,19 +14,6 @@ const GameInvitations = () => {
            navigate(`/menu/${response.data}`)
         }
     }
-
-    useEffect(() => {
-        const fetchInvitations = async () => {
-            try {
-                const response = await fetchData('invitation');
-                setGameInvitations(response);
-            } catch (error) {
-                console.error("Failed to fetch invitations:", error);
-            }
-        };
-
-        fetchInvitations();
-    }, []);
 
     return (
         <>

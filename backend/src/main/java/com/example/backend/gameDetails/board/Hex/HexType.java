@@ -1,4 +1,4 @@
-package com.example.backend.gameDetails;
+package com.example.backend.gameDetails.board.Hex;
 
 public enum HexType {
     WOOD,
@@ -8,3 +8,4 @@ public enum HexType {
     ROCK,
     EMPTY
 }
+

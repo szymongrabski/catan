@@ -32,7 +32,18 @@ public class NotificationsWebSocketHandler extends TextWebSocketHandler {
         WebSocketSession session = sessions.get(userId.toString());
         if (session != null && session.isOpen()) {
             try {
-                session.sendMessage(new TextMessage("friend-request"));
+                session.sendMessage(new TextMessage("friends-request"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void notifyUserAboutGameInvitation(Long userId) {
+        WebSocketSession session = sessions.get(userId.toString());
+        if (session != null && session.isOpen()) {
+            try {
+                session.sendMessage(new TextMessage("game-invitations"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -43,7 +54,7 @@ public class NotificationsWebSocketHandler extends TextWebSocketHandler {
         WebSocketSession session = sessions.get(userId.toString());
         if (session != null && session.isOpen()) {
             try {
-                session.sendMessage(new TextMessage("friend-fetch"));
+                session.sendMessage(new TextMessage("friends-fetch"));
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -4,12 +4,14 @@ import com.example.backend.auth.AuthenticationService;
 import com.example.backend.gameDetails.game.Game;
 import com.example.backend.gameDetails.game.GameRepository;
 import com.example.backend.gameDetails.game.GameService;
+import com.example.backend.gameDetails.player.PlayerRole;
 import com.example.backend.user.User;
 import com.example.backend.user.UserDTO;
 import com.example.backend.user.UserRepository;
 import com.example.backend.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.example.backend.websocket.NotificationsWebSocketHandler;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,8 +29,13 @@ public class InvitationService {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private NotificationsWebSocketHandler webSocketHandler;
+
 
     private InvitationDTO convertToDto(Invitation invitation) {
         InvitationDTO dto = new InvitationDTO();
@@ -52,6 +59,8 @@ public class InvitationService {
 
         Invitation invitation = new Invitation(game, sender, friend);
         invitationRepository.save(invitation);
+
+        webSocketHandler.notifyUserAboutGameInvitation(friendId);
     }
 
     public List<InvitationDTO> getAllInvitationsForCurrentUser() {
@@ -75,7 +84,7 @@ public class InvitationService {
             invitation.setAccepted(true);
             invitationRepository.save(invitation);
 
-            gameService.addPlayerToGame(invitation.getGame(), currentUser);
+            gameService.addPlayerToGame(invitation.getGame(), currentUser, PlayerRole.NORMAL);
 
             return invitation.getGame().getId();
         } else {

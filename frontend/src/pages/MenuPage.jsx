@@ -2,6 +2,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import PlayersList from "../components/PlayersList.jsx";
 import InviteModal from "../components/InviteModal.jsx";
+import {fetchData} from "../api/authenticatedApi.js";
 
 function MenuPage() {
     const { gameId } = useParams();
@@ -12,12 +13,36 @@ function MenuPage() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    useEffect( () => {
+    const [player, setPlayer] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    const fetchPlayer = async () => {
+        try {
+            const response = await fetchData(`game/${gameId}/player`);
+            setPlayer(response);
+        } catch (err) {
+            setError('Failed to fetch player data');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
         if (!authToken) {
             navigate('/login');
+        } else {
+            fetchPlayer();
         }
-    }, [authToken]);
+    }, [authToken, gameId]);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>{error}</div>;
+    }
 
     return (
         <div className="page2">
@@ -36,6 +61,9 @@ function MenuPage() {
                 </div>
                 <div>
                     <button onClick={openModal}>Invite</button>
+                    {player && player.role === "ADMIN" && (
+                        <button>Start game</button>
+                    )}
                 </div>
             </div>
         </div>

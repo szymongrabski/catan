@@ -24,11 +24,15 @@ public class Player {
     @Column(nullable = false)
     private int points;
 
+    @Column
+    private PlayerRole role;
+
     public Player() {}
 
     public Player(User user) {
         this.user = user;
         this.points = 0;
+        this.role = PlayerRole.NORMAL;
     }
 
     public Long getId() {
@@ -57,6 +61,18 @@ public class Player {
 
     public int getPoints() {
         return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public PlayerRole getRole() {
+        return role;
+    }
+
+    public void setRole(PlayerRole role) {
+        this.role = role;
     }
 }
 

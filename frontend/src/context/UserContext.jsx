@@ -6,6 +6,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [friends, setFriends] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
+    const [gameInvitations, setGameInvitations] = useState([]);
     const [userId, setUserId] = useState(null);
     const [socket, setSocket] = useState(null);
 
@@ -13,19 +14,22 @@ export const UserProvider = ({ children }) => {
         fetchUser();
         fetchFriends();
         fetchFriendRequests();
+        fetchGameInvitations();
 
         if (userId) {
-            const ws = new WebSocket(`ws://localhost:8080/ws/friend-request?user-id=${userId}`);
+            const ws = new WebSocket(`ws://localhost:8080/ws/notifications?user-id=${userId}`);
 
             ws.onopen = () => {
                 console.log("WebSocket connection opened");
             };
 
             ws.onmessage = (event) => {
-                if (event.data === 'friend-request') {
+                if (event.data === 'friends-request') {
                     fetchFriendRequests();
-                } else if (event.data === 'friend-fetch') {
+                } else if (event.data === 'friends-fetch') {
                     fetchFriends();
+                } else if (event.data === 'game-invitations') {
+                    fetchGameInvitations();
                 }
             };
 
@@ -40,6 +44,15 @@ export const UserProvider = ({ children }) => {
             };
         }
     }, [userId]);
+
+    const fetchGameInvitations = async () => {
+        try {
+            const response = await fetchData('invitation');
+            setGameInvitations(response);
+        } catch (error) {
+            console.error("Failed to fetch invitations:", error);
+        }
+    }
 
     const fetchUser = async() => {
         try {
@@ -69,7 +82,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ friends, friendRequests, fetchFriends, fetchFriendRequests, userId }}>
+        <UserContext.Provider value={{ friends, friendRequests, fetchFriends, fetchFriendRequests, userId, gameInvitations}}>
             { children }
         </UserContext.Provider>
     );

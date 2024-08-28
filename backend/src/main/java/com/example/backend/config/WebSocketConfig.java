@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new HelloWebSocketHandler(), "/ws/hello")
                 .setAllowedOrigins("http://localhost:5173");
-        registry.addHandler(new NotificationsWebSocketHandler(), "/ws/friend-request")
+        registry.addHandler(new NotificationsWebSocketHandler(), "/ws/notifications")
                 .setAllowedOrigins("http://localhost:5173");
     }
 }

@@ -1,4 +1,4 @@
-package com.example.backend.gameDetails;
+package com.example.backend.gameDetails.board.Hex;
 
 public enum HexNumber {
     ZERO(0), TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6), EIGHT(8), NINE(9), TEN(10), ELEVEN(11), TWELVE(12);
