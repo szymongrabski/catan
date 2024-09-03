@@ -1,42 +1,25 @@
 package com.example.backend.gameDetails.board.Vertex;
 
-
-import com.example.backend.gameDetails.board.Hex.Hex;
-import jakarta.persistence.*;
-
+import com.example.backend.gameDetails.board.Hex.HexData;
+import com.example.backend.gameDetails.board.Hex.HexNumber;
+import com.example.backend.gameDetails.board.Hex.HexType;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "vertices")
 public class Vertex {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private int q;
-    private int r;
-    private String direction;
-
-    @ManyToMany(mappedBy = "vertices")
-    private List<Hex> hexes = new ArrayList<>();
+    private Long boardId;
+    private final int q;
+    private final int r;
+    private final String direction;
+    private final List<HexData> hexDataList;
 
 
-    public Vertex() {}
-
-    public Vertex(int q, int r, String direction) {
+    public Vertex(Long boardId, int q, int r, String direction) {
+        this.boardId = boardId;
         this.q = q;
         this.r = r;
         this.direction = direction;
-    }
-
-    public void addHex(Hex hex) {
-        this.hexes.add(hex);
-    }
-
-    public List<Hex> getHexes() {
-        return hexes;
+        this.hexDataList = new ArrayList<>();
     }
 
     public int getQ() {
@@ -50,6 +33,11 @@ public class Vertex {
     public String getDirection() {
         return direction;
     }
+
+    public void addHexData(HexType type, HexNumber number) {
+        hexDataList.add(new HexData(type, number));
+    }
+
 
     @Override
     public String toString() {

@@ -12,9 +12,8 @@ public class Invitation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "game_id", nullable = false)
-    private Game game;
+    @Column(nullable = false, name = "game_id")
+    private Long gameId;
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
@@ -29,8 +28,8 @@ public class Invitation {
 
     public Invitation() {}
 
-    public Invitation(Game game, User sender, User receiver) {
-        this.game = game;
+    public Invitation(Long gameId, User sender, User receiver) {
+        this.gameId = gameId;
         this.sender = sender;
         this.receiver = receiver;
         this.accepted = false;
@@ -43,11 +42,11 @@ public class Invitation {
     public void setId(Long id) {
         this.id = id;
     }
-    public Game getGame() {
-        return game;
+    public Long getGameId() {
+        return gameId;
     }
-    public void setGame(Game game) {
-        this.game = game;
+    public void setGameId(Long gameId) {
+        this.gameId = gameId;
     }
     public User getSender() {
         return sender;

@@ -2,10 +2,12 @@ package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
 import com.example.backend.gameDetails.player.PlayerDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/game")
@@ -33,7 +35,9 @@ public class GameController {
     }
 
     @GetMapping("/{gameId}/board")
-    public Board getBoardForGame(@PathVariable Long gameId) {
-        return gameService.getBoard(gameId);
+    public ResponseEntity<Board> getGameBoard(@PathVariable Long gameId) {
+        Optional<Game> game = gameService.getGameById(gameId);
+
+        return game.map(value -> ResponseEntity.ok(value.getBoard())).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }

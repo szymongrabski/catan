@@ -17,9 +17,8 @@ public class Player {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
+    @Column(name = "game_id")
+    private Long gameId;
 
     @Column(nullable = false)
     private int points;
@@ -29,7 +28,8 @@ public class Player {
 
     public Player() {}
 
-    public Player(User user) {
+    public Player(Long gameId, User user) {
+        this.gameId = gameId;
         this.user = user;
         this.points = 0;
         this.role = PlayerRole.NORMAL;
@@ -51,12 +51,12 @@ public class Player {
         this.user = user;
     }
 
-    public Game getGame() {
-        return game;
+    public Long getGameId() {
+        return gameId;
     }
 
-    public void setGame(Game game) {
-        this.game = game;
+    public void setGameId(Long gameId) {
+        this.gameId = gameId;
     }
 
     public int getPoints() {

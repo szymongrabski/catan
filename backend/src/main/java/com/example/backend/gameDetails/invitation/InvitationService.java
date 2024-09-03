@@ -1,12 +1,9 @@
 package com.example.backend.gameDetails.invitation;
 
-import com.example.backend.auth.AuthenticationService;
 import com.example.backend.gameDetails.game.Game;
-import com.example.backend.gameDetails.game.GameRepository;
 import com.example.backend.gameDetails.game.GameService;
 import com.example.backend.gameDetails.player.PlayerRole;
 import com.example.backend.user.User;
-import com.example.backend.user.UserDTO;
 import com.example.backend.user.UserRepository;
 import com.example.backend.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +19,13 @@ public class InvitationService {
     private InvitationRepository invitationRepository;
 
     @Autowired
-    private GameRepository gameRepository;
+    private GameService gameService;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private GameService gameService;
 
     @Autowired
     private NotificationsWebSocketHandler webSocketHandler;
@@ -47,7 +41,7 @@ public class InvitationService {
     }
 
     public void sendInvitation(Long gameId, Long friendId) {
-        Game game = gameRepository.findById(gameId)
+        Game game = gameService.getGameById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid game ID"));
 
         User sender = userService.getCurrentUser();
@@ -55,9 +49,8 @@ public class InvitationService {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid friend ID"));
 
-        invitationRepository.deleteByGameAndSenderAndReceiver(game, sender, friend);
 
-        Invitation invitation = new Invitation(game, sender, friend);
+        Invitation invitation = new Invitation(game.getId(), sender, friend);
         invitationRepository.save(invitation);
 
         webSocketHandler.notifyUserAboutGameInvitation(friendId);
@@ -84,9 +77,9 @@ public class InvitationService {
             invitation.setAccepted(true);
             invitationRepository.save(invitation);
 
-            gameService.addPlayerToGame(invitation.getGame(), currentUser, PlayerRole.NORMAL);
+            gameService.addPlayerToGame(invitation.getGameId(), currentUser, PlayerRole.NORMAL);
 
-            return invitation.getGame().getId();
+            return invitation.getGameId();
         } else {
             invitationRepository.delete(invitation);
             return null;

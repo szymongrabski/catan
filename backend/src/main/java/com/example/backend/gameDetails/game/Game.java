@@ -2,30 +2,29 @@ package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
 import com.example.backend.gameDetails.player.Player;
-import jakarta.persistence.*;
 
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
-@Entity
-@Table(name = "games")
 public class Game {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "game_id")
-    private Long id;
+    private static final AtomicLong ID_GENERATOR = new AtomicLong(1);
+    private final Long id;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "board_id")
     private Board board;
 
-    public Game() {}
+    private GameStatus gameStatus;
 
-    public Game(List<Player> players, Board board) {
-        this.players = players;
-        this.board = board;
+    private int currentPlayerIndex;
+
+    public Game() {
+        this.id = ID_GENERATOR.getAndIncrement();
+        this.players = new ArrayList<>();
+        this.gameStatus = GameStatus.IN_PROGRESS;
+        this.currentPlayerIndex = 0;
     }
 
     public Long getId() {
@@ -40,4 +39,29 @@ public class Game {
         this.board = board;
     }
 
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+
+    public void addPlayer(Player player) {
+        if (player == null) {
+            throw new IllegalArgumentException("Player cannot be null");
+        }
+        this.players.add(player);
+    }
+
+    public void startGame() {
+        if (gameStatus != GameStatus.NOT_STARTED) {
+            throw new IllegalStateException("Game cannot be started because it is already " + gameStatus);
+        }
+
+        if (players.size() < 2) {
+            throw new IllegalStateException("Cannot start the game. Minimum of two players required.");
+        }
+
+        this.gameStatus = GameStatus.IN_PROGRESS;
+        Random random = new Random();
+        this.currentPlayerIndex = random.nextInt(players.size());
+    }
 }
