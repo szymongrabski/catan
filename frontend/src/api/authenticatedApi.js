@@ -134,6 +134,27 @@ export async function createGame() {
     }
 }
 
+export async function startGameAPI(gameId) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/${gameId}/start`, null,  config)
+        return response.data;
+    } catch (error) {
+        console.error('Error creating game:', error);
+        throw error;
+    }
+}
+
 export async function sendGameInvitation(gameId, friendId) {
     const authToken = sessionStorage.getItem('authToken');
 

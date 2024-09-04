@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.Player;
 import com.example.backend.gameDetails.player.PlayerDTO;
 import com.example.backend.gameDetails.player.PlayerRepository;
@@ -8,6 +9,7 @@ import com.example.backend.gameDetails.player.PlayerRole;
 import com.example.backend.user.User;
 import com.example.backend.user.UserDTO;
 import com.example.backend.user.UserService;
+import com.example.backend.websocket.GameWebSocketHandler;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +31,12 @@ public class GameService {
     private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
+    private final GameWebSocketHandler gameWebSocketHandler;
 
-    public GameService(PlayerRepository playerRepository, UserService userService) {
+    public GameService(PlayerRepository playerRepository, UserService userService, GameWebSocketHandler gameWebSocketHandler) {
         this.playerRepository = playerRepository;
         this.userService = userService;
+        this.gameWebSocketHandler = gameWebSocketHandler;
 
     }
 
@@ -55,6 +59,7 @@ public class GameService {
         Game game = new Game();
         Board board = new Board();
         game.setBoard(board);
+        logger.info(board.getVertices().toString());
         User currentUser = userService.getCurrentUser();
 
         addGame(game);
@@ -77,6 +82,8 @@ public class GameService {
             Game game = gameOptional.get();
             game.addPlayer(player);
         }
+
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers(gameId);
     }
 
     @Transactional
@@ -91,6 +98,8 @@ public class GameService {
             } catch (IllegalStateException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
             }
+
+            gameWebSocketHandler.notifyAboutRedirection(gameId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game with ID " + gameId + " not found");
         }
@@ -115,11 +124,14 @@ public class GameService {
 
         if (gameOptional.isPresent()) {
             Game game = gameOptional.get();
-            return game.getPlayers().stream()
+            PlayerDTO playerDTO = game.getPlayers().stream()
                     .filter(player -> player.getUser().getId().equals(currentUser.getId()))
                     .map(this::convertToPlayerDTO)
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Player not found in the game"));
+
+            logger.info(playerDTO.getResources().toString());
+            return playerDTO;
         } else {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
         }
@@ -127,8 +139,61 @@ public class GameService {
 
     private PlayerDTO convertToPlayerDTO(Player player) {
         UserDTO userDTO = userService.convertToUserDTO(player.getUser());
-        return new PlayerDTO(player.getId(), player.getPoints(), player.getRole(), userDTO);
+        return new PlayerDTO(player.getId(), player.getPoints(), player.getRole(), userDTO, player.getResources());
     }
 
+    public int getCurrentPlayerIndex(Long gameId) {
+        Optional<Game> gameOptional = getGameById(gameId);
+        if (gameOptional.isPresent()) {
+            Game game = gameOptional.get();
+            return game.getCurrentPlayerIndex();
+        } else {
+            throw new IllegalArgumentException("Game with ID " + gameId + " not found");
+        }
+    }
 
+    public List<Vertex> getUnownedVertices(Long gameId) {
+        Optional<Game> gameOptional = getGameById(gameId);
+        if (gameOptional.isPresent()) {
+            Game game = gameOptional.get();
+            Board board = game.getBoard();
+
+            if (board == null) {
+                throw new IllegalStateException("Board not initialized for the game with ID " + gameId);
+            }
+
+            return board.getVertices().stream()
+                    .filter(vertex -> !vertex.isOccupied())
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Game with ID " + gameId + " not found");
+        }
+    }
+
+    @Transactional
+    public void placeSettlement(Long gameId, Long playerId, int q, int r, String direction) {
+        Optional<Game> gameOptional = getGameById(gameId);
+        if (gameOptional.isPresent()) {
+            Game game = gameOptional.get();
+
+            Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                    .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+            Vertex vertex = game.getBoard().getVertex(q, r, direction);
+
+            if (vertex.getOwner() != null) {
+                throw new IllegalStateException("Vertex at coordinates (" + q + ", " + r + ") with direction '" + direction + "' is already owned.");
+            }
+
+            vertex.setOwner(player);
+
+            player.addPoints(1);
+
+            playerRepository.save(player);
+
+            // Add giving resources when placing second settlement
+        } else {
+            throw new IllegalArgumentException("Game with ID " + gameId + " not found");
+        }
+    }
 }

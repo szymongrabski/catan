@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.Player;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class Game {
     public Game() {
         this.id = ID_GENERATOR.getAndIncrement();
         this.players = new ArrayList<>();
-        this.gameStatus = GameStatus.IN_PROGRESS;
+        this.gameStatus = GameStatus.NOT_STARTED;
         this.currentPlayerIndex = 0;
     }
 
@@ -41,6 +42,10 @@ public class Game {
 
     public List<Player> getPlayers() {
         return players;
+    }
+
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
     }
 
 

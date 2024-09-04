@@ -2,10 +2,14 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import PlayersList from "../components/PlayersList.jsx";
 import InviteModal from "../components/InviteModal.jsx";
-import {fetchData} from "../api/authenticatedApi.js";
+
+import {useGame} from "../context/GameContext.jsx";
+import {startGameAPI} from "../api/authenticatedApi.js";
+import board from "../components/Board.jsx";
 
 function MenuPage() {
     const { gameId } = useParams();
+    const { setGameId, player, loading, error, setError, isReady, setCurrentPlayerIndex } = useGame()
     const navigate = useNavigate();
     const authToken = sessionStorage.getItem('authToken');
 
@@ -13,28 +17,21 @@ function MenuPage() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    const [player, setPlayer] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    const fetchPlayer = async () => {
-        try {
-            const response = await fetchData(`game/${gameId}/player`);
-            setPlayer(response);
-        } catch (err) {
-            setError('Failed to fetch player data');
-        } finally {
-            setLoading(false);
-        }
-    }
+    useEffect(() => {
+        setGameId(gameId);
+    }, []);
+
 
     useEffect(() => {
         if (!authToken) {
             navigate('/login');
-        } else {
-            fetchPlayer();
         }
-    }, [authToken, gameId]);
+
+        if (isReady) {
+            navigate(`/${gameId}/game`);
+        }
+    }, [authToken, navigate, isReady]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -43,6 +40,16 @@ function MenuPage() {
     if (error) {
         return <div>{error}</div>;
     }
+
+    const start = async () => {
+        try {
+            const response = await startGameAPI(gameId);
+            setGameId(response.currentPlayerIndex);
+            navigate(`/${gameId}/game`);
+        } catch (error) {
+            setError(error);
+        }
+    };
 
     return (
         <div className="page2">
@@ -62,7 +69,7 @@ function MenuPage() {
                 <div>
                     <button onClick={openModal}>Invite</button>
                     {player && player.role === "ADMIN" && (
-                        <button>Start game</button>
+                        <button onClick={start}>Start game</button>
                     )}
                 </div>
             </div>

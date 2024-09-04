@@ -1,9 +1,13 @@
 package com.example.backend.gameDetails.player;
 
 
+import com.example.backend.gameDetails.board.Hex.HexType;
 import com.example.backend.gameDetails.game.Game;
 import com.example.backend.user.User;
 import jakarta.persistence.*;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "players")
@@ -26,7 +30,19 @@ public class Player {
     @Column
     private PlayerRole role;
 
-    public Player() {}
+    @ElementCollection
+    @MapKeyEnumerated(EnumType.STRING)
+    @CollectionTable(name = "player_resources", joinColumns = @JoinColumn(name = "player_id"))
+    @Column(name = "quantity")
+    private Map<HexType, Integer> resources = new EnumMap<>(HexType.class);
+
+    public Player() {
+        this.resources.put(HexType.WOOD, 0);
+        this.resources.put(HexType.BRICK, 0);
+        this.resources.put(HexType.WOOL, 0);
+        this.resources.put(HexType.WHEAT, 0);
+        this.resources.put(HexType.ROCK, 0);
+    }
 
     public Player(Long gameId, User user) {
         this.gameId = gameId;
@@ -41,6 +57,10 @@ public class Player {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void addPoints(int points) {
+        this.points += points;
     }
 
     public User getUser() {
@@ -73,6 +93,10 @@ public class Player {
 
     public void setRole(PlayerRole role) {
         this.role = role;
+    }
+
+    public Map<HexType, Integer> getResources() {
+        return resources;
     }
 }
 

@@ -4,11 +4,9 @@ package com.example.backend.gameDetails.board;
 import com.example.backend.gameDetails.board.Hex.Hex;
 import com.example.backend.gameDetails.board.Hex.HexNumber;
 import com.example.backend.gameDetails.board.Hex.HexType;
+import com.example.backend.gameDetails.board.Vertex.Vertex;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Board {
@@ -16,10 +14,13 @@ public class Board {
 
     private final Long id;
     private final List<Hex> hexes;
+    private final List<Vertex> vertices;
+
     private final EnumMap<HexType, Integer> hexTypeCounts;
     private final EnumMap<HexNumber, Integer> hexNumberCounts;
     private final EnumMap<HexType, Integer> hexTypeLimits;
     private final EnumMap<HexNumber, Integer> hexNumberLimits;
+
     private final Random random = new Random();
 
     public Board() {
@@ -30,6 +31,8 @@ public class Board {
 
         this.hexTypeCounts = new EnumMap<>(HexType.class);
         this.hexNumberCounts = new EnumMap<>(HexNumber.class);
+
+        this.vertices = new ArrayList<>();
 
         initializeLimits();
         initializeHexes();
@@ -75,10 +78,10 @@ public class Board {
                 HexType type = getNextHexType();
                 Hex hex;
                 if (type == HexType.EMPTY) {
-                    hex = new Hex(id, actualQ, r, type, HexNumber.ZERO);
+                    hex = new Hex(this, actualQ, r, type, HexNumber.ZERO);
                 } else {
                     HexNumber number = getNextHexNumber();
-                    hex = new Hex(id, actualQ, r, type, number);
+                    hex = new Hex(this, actualQ, r, type, number);
                 }
                 hexes.add(hex);
             }
@@ -109,9 +112,32 @@ public class Board {
         return selectedNumber;
     }
 
+    public Vertex getOrCreateVertex(int q, int r, String direction) {
+        for (Vertex vertex : vertices) {
+            if (vertex.getQ() == q && vertex.getR() == r && vertex.getDirection().equals(direction)) {
+                return vertex;
+            }
+        }
+        Vertex newVertex = new Vertex(q, r, direction);
+        vertices.add(newVertex);
+        return newVertex;
+    }
+
     public List<Hex> getHexes(){
         return hexes;
     }
 
+    public List<Vertex> getVertices() {
+        return vertices;
+    }
+
+    public Vertex getVertex(int q, int r, String direction) {
+        for (Vertex vertex : vertices) {
+            if (vertex.getQ() == q && vertex.getR() == r && vertex.getDirection().equals(direction)) {
+                return vertex;
+            }
+        }
+        throw new IllegalArgumentException("Vertex with coordinates (" + q + ", " + r + ") and direction '" + direction + "' not found.");
+    }
 }
 
