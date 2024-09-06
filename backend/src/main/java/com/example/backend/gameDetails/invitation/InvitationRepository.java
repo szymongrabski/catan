@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     Optional<Invitation> findBySenderAndReceiver(User sender, User receiver);
     List<Invitation> findByReceiver(User receiver);
+
+    List<Invitation> findByReceiverAndAcceptedFalse(User receiver);
 }

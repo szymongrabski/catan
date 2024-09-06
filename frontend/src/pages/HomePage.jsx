@@ -8,7 +8,6 @@ import {faEdit} from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/logo.svg";
 import GameInvitations from "../components/GameInvitations.jsx";
 import {createGame} from "../api/authenticatedApi.js";
-import Test from "../components/Test.jsx";
 
 function HomePage() {
     const navigate = useNavigate();

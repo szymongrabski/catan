@@ -60,4 +60,8 @@ public class Hex {
         return type;
     }
 
+    public Map<String, Vertex> getVertices() {
+        return vertices;
+    }
+
 }

@@ -1,7 +1,9 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.PlayerDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,7 @@ public class GameController {
     public ResponseEntity<Map<String, Object>> startGame(@PathVariable Long gameId) {
         try {
             gameService.startGame(gameId);
-            int currentPlayerIndex = gameService.getCurrentPlayerIndex(gameId);
+            Long currentPlayerIndex = gameService.getCurrentPlayerIndex(gameId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("currentPlayerIndex", currentPlayerIndex);
@@ -39,10 +41,10 @@ public class GameController {
         }
     }
 
-    @GetMapping("/{gameId}/currentPlayer")
-    public ResponseEntity<Integer> getCurrentPlayer(@PathVariable Long gameId) {
+    @GetMapping("/{gameId}/current-player")
+    public ResponseEntity<Long> getCurrentPlayer(@PathVariable Long gameId) {
         try {
-            Integer currentPlayerIndex = gameService.getCurrentPlayerIndex(gameId);
+           Long currentPlayerIndex = gameService.getCurrentPlayerIndex(gameId);
             return ResponseEntity.ok(currentPlayerIndex);
         } catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -68,12 +70,15 @@ public class GameController {
         return game.map(value -> ResponseEntity.ok(value.getBoard())).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping("/{gameId}/place-settlement")
-    public ResponseEntity<Void> placeSettlement(@PathVariable Long gameId, @RequestBody Long playerId, @RequestBody int q, @RequestBody int r) {
+    @GetMapping("/{gameId}/available-vertices")
+    public ResponseEntity<List<Vertex>> getAvailableVertices(@PathVariable Long gameId) {
         try {
-            return ResponseEntity.ok().build();
+            List<Vertex> availableVertices = gameService.getAvailableVertices(gameId);
+            return ResponseEntity.ok(availableVertices);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

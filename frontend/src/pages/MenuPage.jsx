@@ -5,7 +5,6 @@ import InviteModal from "../components/InviteModal.jsx";
 
 import {useGame} from "../context/GameContext.jsx";
 import {startGameAPI} from "../api/authenticatedApi.js";
-import board from "../components/Board.jsx";
 
 function MenuPage() {
     const { gameId } = useParams();
@@ -19,6 +18,7 @@ function MenuPage() {
 
 
     useEffect(() => {
+        console.log(gameId)
         setGameId(gameId);
     }, []);
 
@@ -29,6 +29,7 @@ function MenuPage() {
         }
 
         if (isReady) {
+            console.log("jestem tu")
             navigate(`/${gameId}/game`);
         }
     }, [authToken, navigate, isReady]);
@@ -44,8 +45,8 @@ function MenuPage() {
     const start = async () => {
         try {
             const response = await startGameAPI(gameId);
-            setGameId(response.currentPlayerIndex);
-            navigate(`/${gameId}/game`);
+            console.log("current", response.currentPlayerIndex)
+            setCurrentPlayerIndex(response.currentPlayerIndex);
         } catch (error) {
             setError(error);
         }

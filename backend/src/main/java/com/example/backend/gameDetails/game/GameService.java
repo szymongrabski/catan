@@ -59,7 +59,6 @@ public class GameService {
         Game game = new Game();
         Board board = new Board();
         game.setBoard(board);
-        logger.info(board.getVertices().toString());
         User currentUser = userService.getCurrentUser();
 
         addGame(game);
@@ -83,7 +82,7 @@ public class GameService {
             game.addPlayer(player);
         }
 
-        gameWebSocketHandler.notifyUserAboutFetchingPlayers(gameId);
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers();
     }
 
     @Transactional
@@ -99,7 +98,7 @@ public class GameService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
             }
 
-            gameWebSocketHandler.notifyAboutRedirection(gameId);
+            gameWebSocketHandler.notifyAboutRedirection();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game with ID " + gameId + " not found");
         }
@@ -142,7 +141,7 @@ public class GameService {
         return new PlayerDTO(player.getId(), player.getPoints(), player.getRole(), userDTO, player.getResources());
     }
 
-    public int getCurrentPlayerIndex(Long gameId) {
+    public Long getCurrentPlayerIndex(Long gameId) {
         Optional<Game> gameOptional = getGameById(gameId);
         if (gameOptional.isPresent()) {
             Game game = gameOptional.get();
@@ -152,7 +151,7 @@ public class GameService {
         }
     }
 
-    public List<Vertex> getUnownedVertices(Long gameId) {
+    public List<Vertex> getAvailableVertices(Long gameId) {
         Optional<Game> gameOptional = getGameById(gameId);
         if (gameOptional.isPresent()) {
             Game game = gameOptional.get();
@@ -162,36 +161,14 @@ public class GameService {
                 throw new IllegalStateException("Board not initialized for the game with ID " + gameId);
             }
 
-            return board.getVertices().stream()
-                    .filter(vertex -> !vertex.isOccupied())
-                    .collect(Collectors.toList());
-        } else {
-            throw new IllegalArgumentException("Game with ID " + gameId + " not found");
-        }
-    }
-
-    @Transactional
-    public void placeSettlement(Long gameId, Long playerId, int q, int r, String direction) {
-        Optional<Game> gameOptional = getGameById(gameId);
-        if (gameOptional.isPresent()) {
-            Game game = gameOptional.get();
-
-            Player player = playerRepository.findByIdAndGameId(playerId, gameId)
-                    .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
-
-            Vertex vertex = game.getBoard().getVertex(q, r, direction);
-
-            if (vertex.getOwner() != null) {
-                throw new IllegalStateException("Vertex at coordinates (" + q + ", " + r + ") with direction '" + direction + "' is already owned.");
+            if (game.getRoundNumber() <= 2) {
+                return board.getVertices().stream()
+                        .filter(vertex -> !vertex.isOccupied())
+                        .collect(Collectors.toList());
             }
 
-            vertex.setOwner(player);
-
-            player.addPoints(1);
-
-            playerRepository.save(player);
-
-            // Add giving resources when placing second settlement
+            // fix
+            return board.getVertices();
         } else {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
         }

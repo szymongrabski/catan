@@ -19,13 +19,16 @@ public class Game {
 
     private GameStatus gameStatus;
 
-    private int currentPlayerIndex;
+    private Long currentPlayerIndex;
+
+    private int roundNumber;
 
     public Game() {
         this.id = ID_GENERATOR.getAndIncrement();
         this.players = new ArrayList<>();
         this.gameStatus = GameStatus.NOT_STARTED;
-        this.currentPlayerIndex = 0;
+        this.currentPlayerIndex = 0L;
+        this.roundNumber = 0;
     }
 
     public Long getId() {
@@ -44,8 +47,20 @@ public class Game {
         return players;
     }
 
-    public int getCurrentPlayerIndex() {
+    public Long getCurrentPlayerIndex() {
         return currentPlayerIndex;
+    }
+
+    public int getRoundNumber() {
+        return roundNumber;
+    }
+
+    public void setRoundNumber(int roundNumber) {
+        this.roundNumber = roundNumber;
+    }
+
+    public void addToRoundNumber() {
+        this.roundNumber++;
     }
 
 
@@ -67,6 +82,6 @@ public class Game {
 
         this.gameStatus = GameStatus.IN_PROGRESS;
         Random random = new Random();
-        this.currentPlayerIndex = random.nextInt(players.size());
+        this.currentPlayerIndex = players.get(random.nextInt(players.size())).getId();;
     }
 }

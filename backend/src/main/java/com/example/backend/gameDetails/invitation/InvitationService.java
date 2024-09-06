@@ -59,7 +59,7 @@ public class InvitationService {
     public List<InvitationDTO> getAllInvitationsForCurrentUser() {
         User user = userService.getCurrentUser();
 
-        List<Invitation> invitations = invitationRepository.findByReceiver(user);
+        List<Invitation> invitations = invitationRepository.findByReceiverAndAcceptedFalse(user);
 
         return invitations.stream().map(this::convertToDto).collect(Collectors.toList());
     }

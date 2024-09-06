@@ -20,26 +20,27 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         URI uri = session.getUri();
         assert uri != null;
         String query = uri.getQuery();
-        String gameId = extractGameIdFromQuery(query);
-        if (gameId != null) {
-            session.getAttributes().put("game-id", gameId);
-            sessions.put(gameId, session);
+        String playerId = extractGameIdFromQuery(query);
+        if (playerId != null) {
+            session.getAttributes().put("player-id", playerId);
+            sessions.put(playerId, session);
         }
         super.afterConnectionEstablished(session);
     }
 
-    public void notifyUserAboutFetchingPlayers(Long gameId) {
-        WebSocketSession session = sessions.get(gameId.toString());
-        if (session != null && session.isOpen()) {
-            try {
-                session.sendMessage(new TextMessage("fetch-players"));
-            } catch (IOException e) {
-                e.printStackTrace();
+    public void notifyUserAboutFetchingPlayers() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-players"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    public void notifyAboutRedirection(Long gameId) {
+    public void notifyAboutRedirection() {
         for (WebSocketSession session : sessions.values()) {
             if (session.isOpen()) {
                 try {
@@ -54,7 +55,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (query != null) {
             for (String param : query.split("&")) {
                 String[] pair = param.split("=");
-                if ("game-id".equals(pair[0])) {
+                if ("player-id".equals(pair[0])) {
                     return pair[1];
                 }
             }
@@ -64,7 +65,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        String userId = (String) session.getAttributes().get("game-id");
+        String userId = (String) session.getAttributes().get("player-id");
         if (userId != null) {
             sessions.remove(userId);
         }

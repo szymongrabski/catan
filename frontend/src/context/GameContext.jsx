@@ -18,29 +18,22 @@ export const GameProvider = ({ children }) => {
 
     const fetchPlayer = async () => {
         if (!gameId) return;
-
         try {
             const response = await fetchData(`game/${gameId}/player`);
             setPlayer(response);
         } catch (err) {
             setError('Failed to fetch player data');
-        } finally {
-            setLoading(false);
         }
     }
 
     const fetchBoard = async () => {
         if (!gameId) return;
         try {
-            console.log("fetching board")
             const response = await fetchData(`game/${gameId}/board`);
             setBoard(response);
         } catch (err) {
             setError('Failed to fetch board');
-        } finally {
-            setLoading(false);
         }
-
     }
 
     const fetchPlayers = async () => {
@@ -54,30 +47,53 @@ export const GameProvider = ({ children }) => {
 
     const fetchCurrentPlayerIndex = async () => {
         try {
-            const response = await fetchData(`game/${gameId}/currentPlayer`);
-            console.log("fetching current player index " + response)
-            setCurrentPlayerIndex(response.currentPlayerIndex);
+            const response = await fetchData(`game/${gameId}/current-player`);
+            console.log("fetching currentPlayerIndex", response);
+            setCurrentPlayerIndex(response);
         } catch (err) {
             setError('Failed to fetch currentPlayer data');
         }
     }
 
+    const isPlayersTurn = () => {
+        return player.id === currentPlayerIndex
+    }
+
+    const fetchGameData = async () => {
+        if (!gameId) return;
+        try {
+            await Promise.all([
+                fetchPlayer(),
+                fetchPlayers(gameId),
+                fetchBoard(gameId),
+                fetchBoard(gameId)
+            ]);
+        } catch (err) {
+            setError('Failed to fetch game data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (gameId) {
-            fetchPlayer();
-            fetchPlayers();
-            fetchBoard();
-            fetchCurrentPlayerIndex();
+            fetchGameData();
+        }
+    }, [gameId]);
 
-            const ws = new WebSocket(`ws://localhost:8080/ws/game?game-id=${gameId}`);
+    useEffect(() => {
+        if (player) {
+            const ws = new WebSocket(`ws://localhost:8080/ws/game?player-id=${player.id}`);
+
             ws.onopen = () => {
                 console.log("Game WebSocket connection opened");
             };
 
             ws.onmessage = (event) => {
                 if (event.data === 'fetch-players') {
-                    fetchPlayers();
+                    fetchPlayers(gameId);
                 } else if (event.data === 'redirect') {
+                    console.log("REDIRECTING");
                     setIsReady(true);
                 }
             };
@@ -92,10 +108,10 @@ export const GameProvider = ({ children }) => {
                 ws.close();
             };
         }
-    }, [gameId])
+    }, [player]);
 
     return (
-        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex}}>
+        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn}}>
             { children }
         </GameContext.Provider>
     );
