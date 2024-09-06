@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.Player;
 import com.example.backend.gameDetails.player.PlayerDTO;
@@ -163,7 +164,7 @@ public class GameService {
 
             if (game.getRoundNumber() <= 2) {
                 return board.getVertices().stream()
-                        .filter(vertex -> !vertex.isOccupied())
+                        .filter(Vertex::isBuildable)
                         .collect(Collectors.toList());
             }
 
@@ -173,6 +174,7 @@ public class GameService {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
         }
     }
+
     public void placeSettlement(Long gameId, Long playerId, int q, int r, String direction) {
         Game game = getGameById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
@@ -188,7 +190,18 @@ public class GameService {
             throw new IllegalStateException("Vertex is occupied");
         }
 
+        if (!vertex.isBuildable()) {
+            throw new IllegalStateException("Vertex is not buildable");
+        }
+
+        List<Vertex> adjacentVertices = board.getAdjacentVertices(vertex);
+        for (Vertex adjacentVertex : adjacentVertices) {
+            adjacentVertex.setBuildable(false);
+        }
+
         vertex.setOwner(player);
+        vertex.setBuildable(false);
+
         player.addPoints(1);
 
         logger.info(board.getVertices().toString());
@@ -212,5 +225,12 @@ public class GameService {
         logger.info(vertices.toString());
 
         return vertices;
+    }
+
+    public Road createRoad(Vertex startVertex, Vertex endVertex, Player owner) {
+        if (!startVertex.isAdjacentTo(endVertex)) {
+            throw new IllegalArgumentException("Vertices are not adjacent");
+        }
+        return new Road(startVertex, endVertex, owner);
     }
 }

@@ -45,6 +45,7 @@ const Board = () => {
 
     const onAvailableVertexClick = async (q, r, direction) => {
         try {
+            console.log(q, r, direction);
             await placeSettlement(gameId, player.id, q, r, direction);
             fetchAvailableVertices();
         } catch (error) {

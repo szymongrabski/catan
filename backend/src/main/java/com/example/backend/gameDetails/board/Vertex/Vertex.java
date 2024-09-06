@@ -9,12 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Vertex {
-    private Player owner;
-
     private final int q;
     private final int r;
     private final String direction;
     private final List<HexData> hexDataList;
+
+    private Player owner;
+    private boolean buildable;
 
 
     public Vertex(int q, int r, String direction) {
@@ -23,6 +24,21 @@ public class Vertex {
         this.direction = direction;
         this.hexDataList = new ArrayList<>();
         this.owner = null;
+        this.buildable = true;
+    }
+
+    public boolean isAdjacentTo(Vertex other) {
+        int dq = Math.abs(this.q - other.q);
+        int dr = Math.abs(this.r - other.r);
+        return (dq == 1 && dr == 0) || (dq == 0 && dr == 1) || (dq == 1 && dr == 1);
+    }
+
+    public boolean isOccupied() {
+        return owner != null;
+    }
+
+    public void addHexData(HexType type, HexNumber number) {
+        hexDataList.add(new HexData(type, number));
     }
 
     public int getQ() {
@@ -41,16 +57,16 @@ public class Vertex {
         return owner;
     }
 
+    public boolean isBuildable() {
+        return buildable;
+    }
+
+    public void setBuildable(boolean buildable) {
+        this.buildable = buildable;
+    }
+
     public void setOwner(Player owner) {
         this.owner = owner;
-    }
-
-    public boolean isOccupied() {
-        return owner != null;
-    }
-
-    public void addHexData(HexType type, HexNumber number) {
-        hexDataList.add(new HexData(type, number));
     }
 
     @Override

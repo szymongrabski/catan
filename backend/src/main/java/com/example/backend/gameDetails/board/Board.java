@@ -4,6 +4,7 @@ package com.example.backend.gameDetails.board;
 import com.example.backend.gameDetails.board.Hex.Hex;
 import com.example.backend.gameDetails.board.Hex.HexNumber;
 import com.example.backend.gameDetails.board.Hex.HexType;
+import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 
 import java.util.*;
@@ -15,6 +16,7 @@ public class Board {
     private final Long id;
     private final List<Hex> hexes;
     private final List<Vertex> vertices;
+    private final List<Road> roads;
 
     private final EnumMap<HexType, Integer> hexTypeCounts;
     private final EnumMap<HexNumber, Integer> hexNumberCounts;
@@ -33,6 +35,7 @@ public class Board {
         this.hexNumberCounts = new EnumMap<>(HexNumber.class);
 
         this.vertices = new ArrayList<>();
+        this.roads = new ArrayList<>();
 
         initializeLimits();
         initializeHexes();
@@ -88,6 +91,42 @@ public class Board {
         }
     }
 
+    public List<Vertex> getAdjacentVertices(Vertex vertex) {
+        List<Vertex> adjacentVertices = new ArrayList<>();
+        int q = vertex.getQ();
+        int r = vertex.getR();
+        String direction = vertex.getDirection();
+
+        switch (direction) {
+            case "N":
+                addIfExists(adjacentVertices, q, r - 1, "S");
+                addIfExists(adjacentVertices, q + 1, r - 2, "S");
+                addIfExists(adjacentVertices, q + 1, r - 1, "S");
+                break;
+            case "S":
+                addIfExists(adjacentVertices, q - 1, r + 1, "N");
+                addIfExists(adjacentVertices, q, r + 1, "N");
+                addIfExists(adjacentVertices, q - 1, r + 2, "N");
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown direction: " + direction);
+        }
+
+        return adjacentVertices;
+    }
+
+    private void addIfExists(List<Vertex> list, int q, int r, String direction) {
+        Vertex potentialVertex = getVertex(q, r, direction);
+        if (vertices.contains(potentialVertex)) {
+            list.add(potentialVertex);
+        }
+    }
+
+
+    private boolean isValidRoad(Vertex v1, Vertex v2) {
+        return v1.isAdjacentTo(v2);
+    }
+
     private HexType getNextHexType() {
         HexType[] hexTypes = HexType.values();
         HexType selectedType;
@@ -127,6 +166,10 @@ public class Board {
         return hexes;
     }
 
+    public List<Road> getRoads(){
+        return roads;
+    }
+
     public List<Vertex> getVertices() {
         return vertices;
     }
@@ -137,7 +180,7 @@ public class Board {
                 return vertex;
             }
         }
-        throw new IllegalArgumentException("Vertex with coordinates (" + q + ", " + r + ") and direction '" + direction + "' not found.");
+        return null;
     }
 }
 

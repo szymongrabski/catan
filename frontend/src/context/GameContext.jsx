@@ -31,6 +31,7 @@ export const GameProvider = ({ children }) => {
         if (!gameId) return;
         try {
             const response = await fetchData(`game/${gameId}/board`);
+            console.log(response);
             setBoard(response);
         } catch (err) {
             setError('Failed to fetch board');
