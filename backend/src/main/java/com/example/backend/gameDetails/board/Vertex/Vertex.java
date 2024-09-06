@@ -55,6 +55,6 @@ public class Vertex {
 
     @Override
     public String toString() {
-        return String.format("Vertex(q=%d, r=%d, direction=%s)", q, r, direction);
+        return String.format("Vertex(q=%d, r=%d, direction=%s, owner=%s)", q, r, direction, owner);
     }
 }

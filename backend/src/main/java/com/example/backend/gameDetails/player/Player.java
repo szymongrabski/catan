@@ -17,7 +17,7 @@ public class Player {
     @Column(name = "player_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -30,7 +30,7 @@ public class Player {
     @Column
     private PlayerRole role;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyEnumerated(EnumType.STRING)
     @CollectionTable(name = "player_resources", joinColumns = @JoinColumn(name = "player_id"))
     @Column(name = "quantity")

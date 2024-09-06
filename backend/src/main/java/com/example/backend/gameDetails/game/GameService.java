@@ -173,4 +173,44 @@ public class GameService {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
         }
     }
+    public void placeSettlement(Long gameId, Long playerId, int q, int r, String direction) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        Board board = game.getBoard();
+
+        Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+        Vertex vertex = board.getVertex(q, r, direction);
+
+        if (vertex.isOccupied()) {
+            throw new IllegalStateException("Vertex is occupied");
+        }
+
+        vertex.setOwner(player);
+        player.addPoints(1);
+
+        logger.info(board.getVertices().toString());
+
+        logger.info(game.getBoard().toString());
+
+        playerRepository.save(player);
+
+        gameWebSocketHandler.notifyAboutFetchingSettlements();
+    }
+
+    public List<Vertex> getSettlementVertices(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        Board board = game.getBoard();
+        List<Vertex> vertices = board.getVertices().stream()
+                .filter(Vertex::isOccupied)
+                .toList();
+
+        logger.info(vertices.toString());
+
+        return vertices;
+    }
 }

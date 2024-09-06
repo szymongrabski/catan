@@ -209,3 +209,33 @@ export async function respondToGameInvitation(invitationId, accept) {
         throw error;
     }
 }
+
+export async function placeSettlement(gameId, playerId, q, r, direction) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/${gameId}/settlements`, null,  {
+            ...config,
+            params: {
+                playerId,
+                q,
+                r,
+                direction
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error while creating settlement:', error);
+        throw error;
+    }
+
+}

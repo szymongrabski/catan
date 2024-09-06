@@ -6,11 +6,10 @@ import Board from "../components/Board.jsx";
 
 function GamePage() {
     const { gameId } = useParams()
-    const { setGameId, player, currentPlayerIndex, loading, fetchCurrentPlayerIndex } = useGame();
+    const { setGameId, player, currentPlayerIndex, loading } = useGame();
 
     useEffect(() => {
         setGameId(gameId)
-        fetchCurrentPlayerIndex()
     }, [])
 
     if (!loading) {

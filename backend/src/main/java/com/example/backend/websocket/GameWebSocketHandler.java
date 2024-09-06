@@ -51,6 +51,18 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             }
         }
     }
+
+    public void notifyAboutFetchingSettlements() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-settlements"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     private String extractGameIdFromQuery(String query) {
         if (query != null) {
             for (String param : query.split("&")) {

@@ -15,6 +15,7 @@ export const GameProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [isReady, setIsReady] = useState(false);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+    const [settlements, setSettlements] = useState([]);
 
     const fetchPlayer = async () => {
         if (!gameId) return;
@@ -55,6 +56,12 @@ export const GameProvider = ({ children }) => {
         }
     }
 
+    const fetchSettlements = async (gameId) => {
+        const response = await fetchData(`game/${gameId}/settlements`);
+        setSettlements(response);
+    }
+
+
     const isPlayersTurn = () => {
         return player.id === currentPlayerIndex
     }
@@ -66,7 +73,8 @@ export const GameProvider = ({ children }) => {
                 fetchPlayer(),
                 fetchPlayers(gameId),
                 fetchBoard(gameId),
-                fetchBoard(gameId)
+                fetchBoard(gameId),
+                fetchSettlements(gameId)
             ]);
         } catch (err) {
             setError('Failed to fetch game data');
@@ -95,6 +103,8 @@ export const GameProvider = ({ children }) => {
                 } else if (event.data === 'redirect') {
                     console.log("REDIRECTING");
                     setIsReady(true);
+                } else if (event.data === 'fetch-settlements') {
+                    fetchSettlements(gameId);
                 }
             };
 
@@ -111,7 +121,7 @@ export const GameProvider = ({ children }) => {
     }, [player]);
 
     return (
-        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn}}>
+        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements}}>
             { children }
         </GameContext.Provider>
     );

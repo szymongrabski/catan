@@ -81,4 +81,29 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @PostMapping("/{gameId}/settlements")
+    public ResponseEntity<String> placeSettlement(
+            @PathVariable Long gameId,
+            @RequestParam Long playerId,
+            @RequestParam int q,
+            @RequestParam int r,
+            @RequestParam String direction) {
+        try {
+            gameService.placeSettlement(gameId, playerId, q, r, direction);
+            return ResponseEntity.ok("Settlement placed successfully");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{gameId}/settlements")
+    public ResponseEntity<List<Vertex>> getSettlements(@PathVariable Long gameId) {
+        try {
+            List<Vertex> settlements = gameService.getSettlementVertices(gameId);
+            return ResponseEntity.ok(settlements);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }
