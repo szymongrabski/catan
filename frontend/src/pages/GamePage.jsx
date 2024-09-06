@@ -15,7 +15,6 @@ function GamePage() {
     if (!loading) {
         return (
             <>
-                <h1>Game Page</h1>
                 {player.id === currentPlayerIndex && (
                     <p>Your Turn</p>
                 )}

@@ -39,6 +39,7 @@ public class Board {
 
         initializeLimits();
         initializeHexes();
+        initializeRoads();
     }
 
     private void initializeLimits() {
@@ -91,6 +92,30 @@ public class Board {
         }
     }
 
+    private void initializeRoads() {
+        for (Vertex vertex : vertices) {
+            List<Vertex> adjacentVertices = getAdjacentVertices(vertex);
+
+            for (Vertex adjacent : adjacentVertices) {
+                if (!roadExists(vertex, adjacent)) {
+                    Road road = new Road(vertex, adjacent, null);
+                    roads.add(road);
+                }
+            }
+        }
+    }
+
+    private boolean roadExists(Vertex v1, Vertex v2) {
+        // Check if a road already exists between v1 and v2
+        for (Road road : roads) {
+            if ((road.getStartVertex().equals(v1) && road.getEndVertex().equals(v2)) ||
+                    (road.getStartVertex().equals(v2) && road.getEndVertex().equals(v1))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Vertex> getAdjacentVertices(Vertex vertex) {
         List<Vertex> adjacentVertices = new ArrayList<>();
         int q = vertex.getQ();
@@ -120,11 +145,6 @@ public class Board {
         if (vertices.contains(potentialVertex)) {
             list.add(potentialVertex);
         }
-    }
-
-
-    private boolean isValidRoad(Vertex v1, Vertex v2) {
-        return v1.isAdjacentTo(v2);
     }
 
     private HexType getNextHexType() {

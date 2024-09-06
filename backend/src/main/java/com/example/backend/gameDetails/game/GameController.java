@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.PlayerDTO;
 import jakarta.transaction.Transactional;
@@ -101,6 +102,16 @@ public class GameController {
     public ResponseEntity<List<Vertex>> getSettlements(@PathVariable Long gameId) {
         try {
             List<Vertex> settlements = gameService.getSettlementVertices(gameId);
+            return ResponseEntity.ok(settlements);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/{gameId}/{playerId}/available-roads")
+    public ResponseEntity<List<Road>> getAvailableRoads(@PathVariable Long gameId, @PathVariable Long playerId) {
+        try {
+            List<Road> settlements = gameService.getAvailableRoads(gameId, playerId);
             return ResponseEntity.ok(settlements);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

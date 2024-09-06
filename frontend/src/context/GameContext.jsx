@@ -50,7 +50,6 @@ export const GameProvider = ({ children }) => {
     const fetchCurrentPlayerIndex = async () => {
         try {
             const response = await fetchData(`game/${gameId}/current-player`);
-            console.log("fetching currentPlayerIndex", response);
             setCurrentPlayerIndex(response);
         } catch (err) {
             setError('Failed to fetch currentPlayer data');

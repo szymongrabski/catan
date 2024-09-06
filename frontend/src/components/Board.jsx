@@ -4,25 +4,34 @@ import { useGame } from "../context/GameContext.jsx";
 import {fetchData, placeSettlement} from "../api/authenticatedApi.js";
 import AvailableVertex from "./AvailableVertex.jsx";
 import Settlement from "./Settlement.jsx";
+import AvailableRoad from "./AvailableRoad.jsx";
 
 const size = 100;
 
 const Board = () => {
     const { gameId, board, isPlayersTurn, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements } = useGame();
     const [availableVertices, setAvailableVertices] = useState([]);
+    const [availableRoads, setAvailableRoads] = useState([]);
+
 
     useEffect(() => {
         fetchCurrentPlayerIndex()
         if (isPlayersTurn) {
             fetchAvailableVertices();
+            fetchAvailableRoads();
+            console.log("available road" + availableRoads)
         }
-
-        console.log(settlements)
     }, []);
 
     const fetchAvailableVertices = async () => {
         const response = await fetchData(`game/${gameId}/available-vertices`);
         setAvailableVertices(response);
+    }
+
+    const fetchAvailableRoads = async () => {
+        const response = await fetchData(`game/${gameId}/${player.id}/available-roads`);
+        console.log(response);
+        setAvailableRoads(response);
     }
 
 
@@ -52,6 +61,15 @@ const Board = () => {
             console.error(error);
         }
     }
+
+    const onRoadClick = async (road) => {
+        try {
+            console.log("Road clicked:", road);
+            // Logic to place a road or perform other actions
+        } catch (error) {
+            console.error("Error placing road:", error);
+        }
+    };
 
 
     if (board) {
@@ -96,6 +114,15 @@ const Board = () => {
                         />
                     );
                 })}
+
+                {isPlayersTurn() && availableRoads.map((road, roadIndex) => (
+                    <AvailableRoad
+                        key={roadIndex}
+                        road={road}
+                        calculateVertexPosition={calculateVertexPosition}
+                        onRoadClick={onRoadClick}
+                    />
+                ))}
             </svg>
         );
     }

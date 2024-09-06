@@ -226,11 +226,32 @@ public class GameService {
 
         return vertices;
     }
+    public List<Road> getAvailableRoads(Long gameId, Long playerId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
 
-    public Road createRoad(Vertex startVertex, Vertex endVertex, Player owner) {
-        if (!startVertex.isAdjacentTo(endVertex)) {
-            throw new IllegalArgumentException("Vertices are not adjacent");
-        }
-        return new Road(startVertex, endVertex, owner);
+        Board board = game.getBoard();
+
+        Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+        List<Vertex> playerVertices = board.getVertices().stream()
+                .filter(vertex -> vertex.getOwner() != null && vertex.getOwner().getId().equals(playerId))
+                .collect(Collectors.toList());
+
+        logger.info(playerVertices.toString());
+
+        List<Road> availableRoads = board.getRoads().stream()
+                .filter(road -> isRoadAdjacentToPlayerVertex(road, playerVertices))
+                .filter(road -> road.getOwner() == null)
+                .collect(Collectors.toList());
+
+        logger.info(availableRoads.toString());
+
+        return availableRoads;
+    }
+    private boolean isRoadAdjacentToPlayerVertex(Road road, List<Vertex> playerVertices) {
+        return playerVertices.contains(road.getStartVertex()) || playerVertices.contains(road.getEndVertex());
     }
 }
+
