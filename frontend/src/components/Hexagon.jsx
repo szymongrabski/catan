@@ -1,5 +1,3 @@
-import React from 'react';
-
 const numberMapping = {
     one: 1,
     two: 2,
@@ -37,7 +35,7 @@ const Hexagon = ({ q, r, size, type, number }) => {
         WOOD: '#295727',
         BRICK: '#9e3923',
         WOOL: '#74c622',
-        WHEAT: '#f1dd36',
+        WHEAT: '#EEB902',
         ROCK: '#97968f',
         default: '#baa380'
     };

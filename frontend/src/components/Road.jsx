@@ -1,9 +1,9 @@
 import React from 'react';
 
-const AvailableRoad = ({ road, calculateVertexPosition, onRoadClick }) => {
+const Road = ({ road, calculateVertexPosition }) => {
     const [midX, midY] = calculateMidpoint(road.startVertex, road.endVertex, calculateVertexPosition);
 
-    const rectWidth = 40;
+    const rectWidth = 80;
     const rectHeight = 10;
 
     const angle = calculateAngle(road.startVertex, road.endVertex, calculateVertexPosition);
@@ -17,10 +17,9 @@ const AvailableRoad = ({ road, calculateVertexPosition, onRoadClick }) => {
             y={rectY}
             width={rectWidth}
             height={rectHeight}
-            fill="white"
-            onClick={() => onRoadClick(road)}
+            fill="blue"
             cursor="pointer"
-            transform={`rotate(${angle}, ${midX}, ${midY})`}  // Rotate the rectangle around its center
+            transform={`rotate(${angle}, ${midX}, ${midY})`}
         />
     );
 };
@@ -42,11 +41,10 @@ const calculateAngle = (startVertex, endVertex, calculateVertexPosition) => {
     const deltaX = endX - startX;
     const deltaY = endY - startY;
 
-    // Calculate the angle in radians and convert it to degrees
     const angleInRadians = Math.atan2(deltaY, deltaX);
     const angleInDegrees = angleInRadians * (180 / Math.PI);
 
     return angleInDegrees;
 };
 
-export default AvailableRoad;
+export default Road;

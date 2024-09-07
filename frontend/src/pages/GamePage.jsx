@@ -3,10 +3,11 @@ import ResourcePanel from "../components/ResourcePanel.jsx";
 import {useEffect} from "react";
 import {useParams} from "react-router-dom";
 import Board from "../components/Board.jsx";
+import PlayersGameRanking from "../components/PlayersGameRanking.jsx";
 
 function GamePage() {
     const { gameId } = useParams()
-    const { setGameId, player, currentPlayerIndex, loading } = useGame();
+    const { setGameId, loading } = useGame();
 
     useEffect(() => {
         setGameId(gameId)
@@ -15,9 +16,7 @@ function GamePage() {
     if (!loading) {
         return (
             <>
-                {player.id === currentPlayerIndex && (
-                    <p>Your Turn</p>
-                )}
+                <PlayersGameRanking/>
                 <Board/>
                 <ResourcePanel />
             </>

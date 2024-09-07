@@ -202,5 +202,16 @@ public class Board {
         }
         return null;
     }
+
+    public Road getRoad(Vertex startVertex, Vertex endVertex) {
+        for (Road road : roads) {
+            if ((road.getStartVertex().equals(startVertex) && road.getEndVertex().equals(endVertex)) ||
+                    (road.getStartVertex().equals(endVertex) && road.getEndVertex().equals(startVertex))) {
+                return road;
+            }
+        }
+        return null;
+    }
+
 }
 

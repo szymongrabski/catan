@@ -16,6 +16,8 @@ export const GameProvider = ({ children }) => {
     const [isReady, setIsReady] = useState(false);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [settlements, setSettlements] = useState([]);
+    const [roads, setRoads] = useState([]);
+    const [availableRoads, setAvailableRoads] = useState([]);
 
     const fetchPlayer = async () => {
         if (!gameId) return;
@@ -31,7 +33,6 @@ export const GameProvider = ({ children }) => {
         if (!gameId) return;
         try {
             const response = await fetchData(`game/${gameId}/board`);
-            console.log(response);
             setBoard(response);
         } catch (err) {
             setError('Failed to fetch board');
@@ -61,6 +62,16 @@ export const GameProvider = ({ children }) => {
         setSettlements(response);
     }
 
+    const fetchRoads = async (gameId) => {
+        const response = await fetchData(`game/${gameId}/roads`);
+        setRoads(response);
+    }
+
+    const fetchAvailableRoads = async () => {
+        const response = await fetchData(`game/${gameId}/${player.id}/available-roads`);
+        setAvailableRoads(response);
+    }
+
 
     const isPlayersTurn = () => {
         return player.id === currentPlayerIndex
@@ -74,7 +85,8 @@ export const GameProvider = ({ children }) => {
                 fetchPlayers(gameId),
                 fetchBoard(gameId),
                 fetchBoard(gameId),
-                fetchSettlements(gameId)
+                fetchSettlements(gameId),
+                fetchRoads(gameId)
             ]);
         } catch (err) {
             setError('Failed to fetch game data');
@@ -105,6 +117,10 @@ export const GameProvider = ({ children }) => {
                     setIsReady(true);
                 } else if (event.data === 'fetch-settlements') {
                     fetchSettlements(gameId);
+                } else if (event.data === 'fetch-roads') {
+                    fetchRoads(gameId);
+                } else if (event.data === 'fetch-available-roads') {
+                    fetchAvailableRoads(gameId);
                 }
             };
 
@@ -121,7 +137,7 @@ export const GameProvider = ({ children }) => {
     }, [player]);
 
     return (
-        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements}}>
+        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads}}>
             { children }
         </GameContext.Provider>
     );

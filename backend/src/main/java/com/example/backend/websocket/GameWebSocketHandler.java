@@ -63,6 +63,32 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             }
         }
     }
+
+    public void notifyAboutFetchingRoads() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-roads"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void notifyAboutFetchingAvailableRoads() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-available-roads"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
     private String extractGameIdFromQuery(String query) {
         if (query != null) {
             for (String param : query.split("&")) {

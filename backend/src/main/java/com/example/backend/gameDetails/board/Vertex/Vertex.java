@@ -7,6 +7,7 @@ import com.example.backend.gameDetails.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Vertex {
     private final int q;
@@ -14,7 +15,7 @@ public class Vertex {
     private final String direction;
     private final List<HexData> hexDataList;
 
-    private Player owner;
+    private Long ownerId;
     private boolean buildable;
 
 
@@ -23,7 +24,7 @@ public class Vertex {
         this.r = r;
         this.direction = direction;
         this.hexDataList = new ArrayList<>();
-        this.owner = null;
+        this.ownerId = null;
         this.buildable = true;
     }
 
@@ -34,7 +35,7 @@ public class Vertex {
     }
 
     public boolean isOccupied() {
-        return owner != null;
+        return ownerId != null;
     }
 
     public void addHexData(HexType type, HexNumber number) {
@@ -53,8 +54,8 @@ public class Vertex {
         return direction;
     }
 
-    public Player getOwner() {
-        return owner;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
     public boolean isBuildable() {
@@ -65,12 +66,25 @@ public class Vertex {
         this.buildable = buildable;
     }
 
-    public void setOwner(Player owner) {
-        this.owner = owner;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override
     public String toString() {
-        return String.format("Vertex(q=%d, r=%d, direction=%s, owner=%s)", q, r, direction, owner);
+        return String.format("Vertex(q=%d, r=%d, direction=%s, ownerId=%s)", q, r, direction, ownerId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vertex vertex = (Vertex) o;
+        return q == vertex.q && r == vertex.r && Objects.equals(direction, vertex.direction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(q, r, direction);
     }
 }

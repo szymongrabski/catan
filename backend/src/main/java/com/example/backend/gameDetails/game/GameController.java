@@ -5,6 +5,8 @@ import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.PlayerDTO;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import java.util.*;
 @RequestMapping("/api/game")
 public class GameController {
     private final GameService gameService;
+    private static final Logger logger = LoggerFactory.getLogger(GameController.class);
 
     public GameController(GameService gameService) {
         this.gameService = gameService;
@@ -115,6 +118,30 @@ public class GameController {
             return ResponseEntity.ok(settlements);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/{gameId}/roads")
+    public ResponseEntity<List<Road>> getRoads(@PathVariable Long gameId) {
+        try {
+            List<Road> roads = gameService.getRoads(gameId);
+            return ResponseEntity.ok(roads);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PostMapping("/{gameId}/{playerId}/roads")
+    public ResponseEntity<String> placeRoad(
+            @PathVariable Long gameId,
+            @PathVariable Long playerId,
+            @RequestBody Road road) {
+        try {
+            gameService.placeRoad(gameId, playerId, road);
+            return ResponseEntity.ok("Road placed successfully");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            logger.info(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

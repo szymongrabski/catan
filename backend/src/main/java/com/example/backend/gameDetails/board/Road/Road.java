@@ -6,12 +6,12 @@ import com.example.backend.gameDetails.player.Player;
 public class Road {
     private Vertex startVertex;
     private Vertex endVertex;
-    private Player owner;
+    private Long ownerId;
 
-    public Road(Vertex startVertex, Vertex endVertex, Player owner) {
+    public Road(Vertex startVertex, Vertex endVertex, Long owner) {
         this.startVertex = startVertex;
         this.endVertex = endVertex;
-        this.owner = owner;
+        this.ownerId = owner;
     }
 
     public Vertex getStartVertex() {
@@ -30,11 +30,15 @@ public class Road {
         this.endVertex = endVertex;
     }
 
-    public Player getOwner() {
-        return owner;
+    public boolean isOccupied() {
+        return ownerId != null;
     }
 
-    public void setOwner(Player owner) {
-        this.owner = owner;
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 }

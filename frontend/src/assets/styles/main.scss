@@ -1,7 +1,7 @@
 @import 'variables';
 
 #root {
-  max-width: 1280px;
+  //max-width: 1280px;
   margin: 0 auto;
   text-align: center;
   box-sizing: border-box;
@@ -138,13 +138,13 @@
   color: red;
 }
 
-ul {
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: 1em;
-  flex-direction: column;
-}
+//ul {
+//  padding: 0;
+//  margin: 0;
+//  display: flex;
+//  gap: 1em;
+//  flex-direction: column;
+//}
 
 .list-element {
   margin: 0;
@@ -175,6 +175,44 @@ ul {
   margin: 2em;
 }
 
+.game-ranking-list {
+  background-color: #2C5530;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-around;
+  li {
+    width: 100%;
+    div {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      p {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.resource-panel {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  width: 100%;
+  margin: 0;
+  div {
+    width: 100%;
+    font-size: large;
+    font-weight: bold;
+    color: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+  }
+}
 
 
 

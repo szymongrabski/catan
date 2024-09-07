@@ -1,17 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import Hexagon from "./Hexagon.jsx";
 import { useGame } from "../context/GameContext.jsx";
-import {fetchData, placeSettlement} from "../api/authenticatedApi.js";
+import {fetchData, placeRoad, placeSettlement} from "../api/authenticatedApi.js";
 import AvailableVertex from "./AvailableVertex.jsx";
 import Settlement from "./Settlement.jsx";
 import AvailableRoad from "./AvailableRoad.jsx";
+import Road from "./Road.jsx";
 
 const size = 100;
 
 const Board = () => {
-    const { gameId, board, isPlayersTurn, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements } = useGame();
+    const { gameId, board, isPlayersTurn, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads } = useGame();
     const [availableVertices, setAvailableVertices] = useState([]);
-    const [availableRoads, setAvailableRoads] = useState([]);
 
 
     useEffect(() => {
@@ -19,19 +19,12 @@ const Board = () => {
         if (isPlayersTurn) {
             fetchAvailableVertices();
             fetchAvailableRoads();
-            console.log("available road" + availableRoads)
         }
     }, []);
 
     const fetchAvailableVertices = async () => {
         const response = await fetchData(`game/${gameId}/available-vertices`);
         setAvailableVertices(response);
-    }
-
-    const fetchAvailableRoads = async () => {
-        const response = await fetchData(`game/${gameId}/${player.id}/available-roads`);
-        console.log(response);
-        setAvailableRoads(response);
     }
 
 
@@ -64,8 +57,8 @@ const Board = () => {
 
     const onRoadClick = async (road) => {
         try {
-            console.log("Road clicked:", road);
-            // Logic to place a road or perform other actions
+            await placeRoad(gameId, player.id, road);
+            fetchAvailableRoads();
         } catch (error) {
             console.error("Error placing road:", error);
         }
@@ -74,7 +67,7 @@ const Board = () => {
 
     if (board) {
         return (
-            <svg width="100%" height="100%" viewBox="-600 -200 1500 1000">
+            <svg width="70%" height="70%" viewBox="-600 -200 1500 1000">
                 {board.hexes.map((hex, hexIndex) => (
                     <Hexagon
                         key={`${hex.q}-${hex.r}`}
@@ -102,6 +95,15 @@ const Board = () => {
                     );
                 })}
 
+                {isPlayersTurn() && availableRoads.map((road, roadIndex) => (
+                    <AvailableRoad
+                        key={roadIndex}
+                        road={road}
+                        calculateVertexPosition={calculateVertexPosition}
+                        onRoadClick={onRoadClick}
+                    />
+                ))}
+
                 {settlements.length > 0 && settlements.map((vertex, vertexIndex) => {
                     const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
 
@@ -115,14 +117,14 @@ const Board = () => {
                     );
                 })}
 
-                {isPlayersTurn() && availableRoads.map((road, roadIndex) => (
-                    <AvailableRoad
+                {roads.length > 0 && roads.map((road, roadIndex) => (
+                    <Road
                         key={roadIndex}
                         road={road}
                         calculateVertexPosition={calculateVertexPosition}
-                        onRoadClick={onRoadClick}
-                    />
+                        />
                 ))}
+
             </svg>
         );
     }

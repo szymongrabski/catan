@@ -168,7 +168,7 @@ public class GameService {
                         .collect(Collectors.toList());
             }
 
-            // fix
+            // add logic for next game stage
             return board.getVertices();
         } else {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
@@ -199,18 +199,41 @@ public class GameService {
             adjacentVertex.setBuildable(false);
         }
 
-        vertex.setOwner(player);
+        vertex.setOwnerId(player.getId());
         vertex.setBuildable(false);
 
         player.addPoints(1);
-
-        logger.info(board.getVertices().toString());
-
-        logger.info(game.getBoard().toString());
-
         playerRepository.save(player);
 
         gameWebSocketHandler.notifyAboutFetchingSettlements();
+        gameWebSocketHandler.notifyAboutFetchingAvailableRoads();
+    }
+
+    public void placeRoad(Long gameId, Long playerId, Road road) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        Board board = game.getBoard();
+
+        Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+        Road road1 = board.getRoad(road.getStartVertex(), road.getEndVertex());
+        logger.info(road1.toString());
+
+        if (road1 == null) {
+            throw new IllegalStateException("Road not found");
+        }
+
+        if (road1.isOccupied()) {
+            throw new IllegalStateException("Road is occupied");
+        }
+
+        road1.setOwnerId(player.getId());
+        playerRepository.save(player);
+        logger.info(road1.toString());
+        // add logic to count longest road for player
+        gameWebSocketHandler.notifyAboutFetchingRoads();
     }
 
     public List<Vertex> getSettlementVertices(Long gameId) {
@@ -226,6 +249,7 @@ public class GameService {
 
         return vertices;
     }
+
     public List<Road> getAvailableRoads(Long gameId, Long playerId) {
         Game game = getGameById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
@@ -236,22 +260,47 @@ public class GameService {
                 .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
 
         List<Vertex> playerVertices = board.getVertices().stream()
-                .filter(vertex -> vertex.getOwner() != null && vertex.getOwner().getId().equals(playerId))
+                .filter(vertex -> vertex.getOwnerId() != null && vertex.getOwnerId().equals(playerId))
                 .collect(Collectors.toList());
 
-        logger.info(playerVertices.toString());
+        List<Road> playerRoads = board.getRoads().stream()
+                .filter(road -> road.getOwnerId() != null && road.getOwnerId().equals(playerId))
+                .toList();
 
         List<Road> availableRoads = board.getRoads().stream()
-                .filter(road -> isRoadAdjacentToPlayerVertex(road, playerVertices))
-                .filter(road -> road.getOwner() == null)
+                .filter(road -> isRoadAdjacentToPlayerVertex(road, playerVertices) || isRoadAdjacentToPlayerRoad(road, playerRoads))
+                .filter(road -> !road.isOccupied())
                 .collect(Collectors.toList());
-
-        logger.info(availableRoads.toString());
 
         return availableRoads;
     }
+
+    public List<Road> getRoads(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        Board board = game.getBoard();
+
+        return board.getRoads().stream()
+                .filter(Road::isOccupied)
+                .collect(Collectors.toList());
+    }
+
+
     private boolean isRoadAdjacentToPlayerVertex(Road road, List<Vertex> playerVertices) {
         return playerVertices.contains(road.getStartVertex()) || playerVertices.contains(road.getEndVertex());
+    }
+
+    private boolean isRoadAdjacentToPlayerRoad(Road road, List<Road> playerRoads) {
+        for (Road playerRoad : playerRoads) {
+            if (road.getStartVertex().equals(playerRoad.getStartVertex()) ||
+                    road.getStartVertex().equals(playerRoad.getEndVertex()) ||
+                    road.getEndVertex().equals(playerRoad.getStartVertex()) ||
+                    road.getEndVertex().equals(playerRoad.getEndVertex())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

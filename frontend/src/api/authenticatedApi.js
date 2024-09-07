@@ -237,5 +237,27 @@ export async function placeSettlement(gameId, playerId, q, r, direction) {
         console.error('Error while creating settlement:', error);
         throw error;
     }
+}
 
+export async function placeRoad(gameId, playerId, road) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    console.log(road)
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/${gameId}/${playerId}/roads`, road,  config);
+        return response;
+    } catch (error) {
+        console.error('Error while creating road:', error);
+        throw error;
+    }
 }
