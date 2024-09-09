@@ -31,7 +31,7 @@ const FriendsList = ({unfriend=false, invite=false, gameId}) => {
                     friends.map((friend) => (
                         <li key={friend.id} className="list-element">
                             <p>{friend.username}</p>
-                            <FontAwesomeIcon icon={faBars} onClick={() => toggleMenu(friend.id)} />
+                            <FontAwesomeIcon icon={faBars} onClick={() => toggleMenu(friend.id)}/>
                             {activeFriendId === friend.id && (
                                 <div className="dropdown-menu">
                                     {unfriend && (

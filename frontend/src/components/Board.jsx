@@ -10,21 +10,29 @@ import Road from "./Road.jsx";
 const size = 100;
 
 const Board = () => {
-    const { gameId, board, isPlayersTurn, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads } = useGame();
+    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound } = useGame();
     const [availableVertices, setAvailableVertices] = useState([]);
 
 
     useEffect(() => {
         fetchCurrentPlayerIndex()
-        if (isPlayersTurn) {
+        if (currentPlayerIndex === player.id) {
             fetchAvailableVertices();
             fetchAvailableRoads();
         }
-    }, []);
+    }, [currentPlayerIndex]);
 
     const fetchAvailableVertices = async () => {
-        const response = await fetchData(`game/${gameId}/available-vertices`);
+        const response = await fetchData(`game/${gameId}/${player.id}/available-vertices`);
         setAvailableVertices(response);
+    }
+
+    const countPlayersRoads = () => {
+        return roads.filter(road => road.ownerId === player.id).length;
+    }
+
+    const countPlayersSettlements = () => {
+        return settlements.filter(set => set.ownerId === player.id).length;
     }
 
 
@@ -47,7 +55,6 @@ const Board = () => {
 
     const onAvailableVertexClick = async (q, r, direction) => {
         try {
-            console.log(q, r, direction);
             await placeSettlement(gameId, player.id, q, r, direction);
             fetchAvailableVertices();
         } catch (error) {
@@ -67,7 +74,7 @@ const Board = () => {
 
     if (board) {
         return (
-            <svg width="70%" height="70%" viewBox="-600 -200 1500 1000">
+            <svg width="80%" height="80%" viewBox="-580 -200 1500 1000">
                 {board.hexes.map((hex, hexIndex) => (
                     <Hexagon
                         key={`${hex.q}-${hex.r}`}
@@ -79,7 +86,7 @@ const Board = () => {
                     />
                 ))}
 
-                {isPlayersTurn() && availableVertices.map((vertex, vertexIndex) => {
+                {currentPlayerIndex == player.id && gameRound <= 1 && countPlayersSettlements() < gameRound + 1 && availableVertices.map((vertex, vertexIndex) => {
                     const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
 
                     return (
@@ -95,7 +102,7 @@ const Board = () => {
                     );
                 })}
 
-                {isPlayersTurn() && availableRoads.map((road, roadIndex) => (
+                {currentPlayerIndex == player.id && gameRound <= 1 && countPlayersRoads() < gameRound + 1 && countPlayersSettlements() > countPlayersRoads() && availableRoads.map((road, roadIndex) => (
                     <AvailableRoad
                         key={roadIndex}
                         road={road}
@@ -104,7 +111,7 @@ const Board = () => {
                     />
                 ))}
 
-                {settlements.length > 0 && settlements.map((vertex, vertexIndex) => {
+                {settlements.map((vertex, vertexIndex) => {
                     const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
 
                     return (
@@ -117,7 +124,7 @@ const Board = () => {
                     );
                 })}
 
-                {roads.length > 0 && roads.map((road, roadIndex) => (
+                {roads.map((road, roadIndex) => (
                     <Road
                         key={roadIndex}
                         road={road}

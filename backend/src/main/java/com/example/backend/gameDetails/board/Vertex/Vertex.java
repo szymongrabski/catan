@@ -70,6 +70,10 @@ public class Vertex {
         this.ownerId = ownerId;
     }
 
+    public List<HexData> getHexDataList() {
+        return hexDataList;
+    }
+
     @Override
     public String toString() {
         return String.format("Vertex(q=%d, r=%d, direction=%s, ownerId=%s)", q, r, direction, ownerId);

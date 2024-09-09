@@ -1,4 +1,5 @@
 import { useGame } from "../context/GameContext.jsx";
+import {useEffect} from "react";
 
 const typeColors = {
     WOOD: '#295727',
@@ -10,30 +11,32 @@ const typeColors = {
 };
 
 const ResourcePanel = () => {
-    const { player } = useGame();
+    const { player, players } = useGame();
+    const currentPlayer = players.find(p => p.id == player.id);
 
-    if (player) {
+
+    if (currentPlayer) {
         return (
             <div className="resource-panel">
                 <div style={{ backgroundColor: typeColors.WOOD }}>
                     <p>Wood</p>
-                    <p>{player.resources.WOOD}</p>
+                    <p>{currentPlayer.resources.WOOD}</p>
                 </div>
                 <div style={{ backgroundColor: typeColors.BRICK }}>
                     <p>Brick</p>
-                    <p>{player.resources.BRICK}</p>
+                    <p>{currentPlayer.resources.BRICK}</p>
                 </div>
                 <div style={{ backgroundColor: typeColors.WOOL }}>
                     <p>Wool</p>
-                    <p>{player.resources.WOOL}</p>
+                    <p>{currentPlayer.resources.WOOL}</p>
                 </div>
                 <div style={{ backgroundColor: typeColors.WHEAT }}>
                     <p>Wheat</p>
-                    <p>{player.resources.WHEAT}</p>
+                    <p>{currentPlayer.resources.WHEAT}</p>
                 </div>
                 <div style={{ backgroundColor: typeColors.ROCK }}>
                     <p>Rock</p>
-                    <p>{player.resources.ROCK}</p>
+                    <p>{currentPlayer.resources.ROCK}</p>
                 </div>
             </div>
         );

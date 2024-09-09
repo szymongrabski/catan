@@ -88,6 +88,31 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void notifyAboutFetchingCurrentPlayerIndex() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-current-player-index"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void notifyAboutFetchingGameRound() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-game-round"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
 
     private String extractGameIdFromQuery(String query) {
         if (query != null) {

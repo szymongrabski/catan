@@ -5,6 +5,8 @@
   margin: 0 auto;
   text-align: center;
   box-sizing: border-box;
+  background-color: #306BAC;
+  height: 100vh;
 }
 
 .logo-container {
@@ -43,6 +45,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #989572;
 }
 
 .home-page-container {
@@ -176,7 +179,7 @@
 }
 
 .game-ranking-list {
-  background-color: #2C5530;
+  background-color: #141B41;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -203,11 +206,11 @@
   display: flex;
   width: 100%;
   margin: 0;
+  border-top: #141B41 3px solid;
   div {
     width: 100%;
     font-size: large;
     font-weight: bold;
-    color: #1a1a1a;
     display: flex;
     justify-content: center;
     gap: 1em;

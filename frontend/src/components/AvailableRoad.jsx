@@ -18,6 +18,7 @@ const AvailableRoad = ({ road, calculateVertexPosition, onRoadClick }) => {
             width={rectWidth}
             height={rectHeight}
             fill="white"
+            stroke="black"
             onClick={() => onRoadClick(road)}
             cursor="pointer"
             transform={`rotate(${angle}, ${midX}, ${midY})`}  // Rotate the rectangle around its center

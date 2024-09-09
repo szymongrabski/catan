@@ -19,15 +19,18 @@ public class Game {
 
     private GameStatus gameStatus;
 
-    private Long currentPlayerIndex;
+    private int currentIndex;
+
+    private int startRoundIndex;
 
     private int roundNumber;
+
 
     public Game() {
         this.id = ID_GENERATOR.getAndIncrement();
         this.players = new ArrayList<>();
         this.gameStatus = GameStatus.NOT_STARTED;
-        this.currentPlayerIndex = 0L;
+        this.currentIndex = 0;
         this.roundNumber = 0;
     }
 
@@ -48,15 +51,11 @@ public class Game {
     }
 
     public Long getCurrentPlayerIndex() {
-        return currentPlayerIndex;
+        return players.get(currentIndex).getId();
     }
 
     public int getRoundNumber() {
         return roundNumber;
-    }
-
-    public void setRoundNumber(int roundNumber) {
-        this.roundNumber = roundNumber;
     }
 
     public void addToRoundNumber() {
@@ -71,6 +70,18 @@ public class Game {
         this.players.add(player);
     }
 
+    public int getStartRoundIndex() {
+        return startRoundIndex;
+    }
+
+    public void setCurrentIndex(int currentIndex) {
+        this.currentIndex = currentIndex;
+    }
+
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
+
     public void startGame() {
         if (gameStatus != GameStatus.NOT_STARTED) {
             throw new IllegalStateException("Game cannot be started because it is already " + gameStatus);
@@ -82,6 +93,7 @@ public class Game {
 
         this.gameStatus = GameStatus.IN_PROGRESS;
         Random random = new Random();
-        this.currentPlayerIndex = players.get(random.nextInt(players.size())).getId();;
+        this.currentIndex = random.nextInt(players.size());
+        this.startRoundIndex = currentIndex;
     }
 }

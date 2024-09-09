@@ -18,6 +18,7 @@ export const GameProvider = ({ children }) => {
     const [settlements, setSettlements] = useState([]);
     const [roads, setRoads] = useState([]);
     const [availableRoads, setAvailableRoads] = useState([]);
+    const [gameRound, setGameRound] = useState(0);
 
     const fetchPlayer = async () => {
         if (!gameId) return;
@@ -42,7 +43,10 @@ export const GameProvider = ({ children }) => {
     const fetchPlayers = async () => {
         try {
             const players = await fetchData(`game/${gameId}/players`);
-            setPlayers(players);
+
+            const sortedPlayers = players.sort((a, b) => a.id - b.id);
+
+            setPlayers(sortedPlayers);
         } catch (error) {
             setError('Failed to fetch players data');
         }
@@ -72,6 +76,10 @@ export const GameProvider = ({ children }) => {
         setAvailableRoads(response);
     }
 
+    const fetchGameRound = async () => {
+        const response = await fetchData(`game/${gameId}/round`);
+        setGameRound(response);
+    }
 
     const isPlayersTurn = () => {
         return player.id === currentPlayerIndex
@@ -86,7 +94,9 @@ export const GameProvider = ({ children }) => {
                 fetchBoard(gameId),
                 fetchBoard(gameId),
                 fetchSettlements(gameId),
-                fetchRoads(gameId)
+                fetchRoads(gameId),
+                fetchGameRound(),
+                fetchCurrentPlayerIndex()
             ]);
         } catch (err) {
             setError('Failed to fetch game data');
@@ -112,6 +122,7 @@ export const GameProvider = ({ children }) => {
             ws.onmessage = (event) => {
                 if (event.data === 'fetch-players') {
                     fetchPlayers(gameId);
+                    console.log(players)
                 } else if (event.data === 'redirect') {
                     console.log("REDIRECTING");
                     setIsReady(true);
@@ -121,6 +132,10 @@ export const GameProvider = ({ children }) => {
                     fetchRoads(gameId);
                 } else if (event.data === 'fetch-available-roads') {
                     fetchAvailableRoads(gameId);
+                } else if (event.data === 'fetch-current-player-index') {
+                    fetchCurrentPlayerIndex();
+                } else if (event.data === 'fetch-game-round') {
+                    fetchGameRound();
                 }
             };
 
@@ -137,7 +152,7 @@ export const GameProvider = ({ children }) => {
     }, [player]);
 
     return (
-        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads}}>
+        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads, gameRound}}>
             { children }
         </GameContext.Provider>
     );

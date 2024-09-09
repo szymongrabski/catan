@@ -74,10 +74,10 @@ public class GameController {
         return game.map(value -> ResponseEntity.ok(value.getBoard())).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @GetMapping("/{gameId}/available-vertices")
-    public ResponseEntity<List<Vertex>> getAvailableVertices(@PathVariable Long gameId) {
+    @GetMapping("/{gameId}/{playerId}/available-vertices")
+    public ResponseEntity<List<Vertex>> getAvailableVertices(@PathVariable Long gameId, @PathVariable Long playerId) {
         try {
-            List<Vertex> availableVertices = gameService.getAvailableVertices(gameId);
+            List<Vertex> availableVertices = gameService.getAvailableVertices(gameId, playerId);
             return ResponseEntity.ok(availableVertices);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -85,6 +85,18 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @GetMapping("/{gameId}/round")
+    public ResponseEntity<Integer> getGameRound(@PathVariable Long gameId) {
+        Optional<Game> game = gameService.getGameById(gameId);
+
+        if (game.isPresent()) {
+            return ResponseEntity.ok(game.get().getRoundNumber());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
     @PostMapping("/{gameId}/settlements")
     public ResponseEntity<String> placeSettlement(

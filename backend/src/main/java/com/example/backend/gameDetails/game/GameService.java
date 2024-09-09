@@ -1,6 +1,8 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Hex.HexData;
+import com.example.backend.gameDetails.board.Hex.HexType;
 import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.Player;
@@ -105,17 +107,17 @@ public class GameService {
         }
     }
 
-    public List<PlayerDTO> getPlayersForGame(Long gameId) {
-        Optional<Game> gameOptional = getGameById(gameId);
 
-        if (gameOptional.isPresent()) {
-            Game game = gameOptional.get();
-            return game.getPlayers().stream()
-                    .map(this::convertToPlayerDTO)
-                    .collect(Collectors.toList());
-        } else {
-            throw new IllegalArgumentException("Game with ID " + gameId + " not found");
+    public List<PlayerDTO> getPlayersForGame(Long gameId) {
+        List<Player> players = playerRepository.findByGameId(gameId);
+
+        if (players.isEmpty()) {
+            throw new IllegalArgumentException("No players found for game ID " + gameId);
         }
+
+        return players.stream()
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
     }
 
     public PlayerDTO getPlayer(Long gameId) {
@@ -130,7 +132,6 @@ public class GameService {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Player not found in the game"));
 
-            logger.info(playerDTO.getResources().toString());
             return playerDTO;
         } else {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
@@ -152,7 +153,7 @@ public class GameService {
         }
     }
 
-    public List<Vertex> getAvailableVertices(Long gameId) {
+    public List<Vertex> getAvailableVertices(Long gameId, Long playerId) {
         Optional<Game> gameOptional = getGameById(gameId);
         if (gameOptional.isPresent()) {
             Game game = gameOptional.get();
@@ -162,14 +163,27 @@ public class GameService {
                 throw new IllegalStateException("Board not initialized for the game with ID " + gameId);
             }
 
-            if (game.getRoundNumber() <= 2) {
+            Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                    .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+            boolean hasEnoughResources = player.getResources().getOrDefault(HexType.WOOD, 0) >= 1 &&
+                    player.getResources().getOrDefault(HexType.BRICK, 0) >= 1 && player.getResources().getOrDefault(HexType.WOOL, 0) >= 1
+                    && player.getResources().getOrDefault(HexType.WHEAT, 0) >= 1;
+
+            if (game.getRoundNumber() <= 1) {
+                // change to show roads from only the last placed settlement
                 return board.getVertices().stream()
                         .filter(Vertex::isBuildable)
                         .collect(Collectors.toList());
+            } else if (hasEnoughResources) {
+                List<Road> playerRoads = board.getRoads().stream()
+                        .filter(road -> road.getOwnerId() != null && road.getOwnerId().equals(playerId))
+                        .collect(Collectors.toList());
+                return board.getVertices().stream()
+                        .filter(vertex -> vertex.isBuildable() && isVertexAdjacentToPlayerRoad(vertex, playerRoads))
+                        .collect(Collectors.toList());
             }
-
-            // add logic for next game stage
-            return board.getVertices();
+            return new ArrayList<>();
         } else {
             throw new IllegalArgumentException("Game with ID " + gameId + " not found");
         }
@@ -203,8 +217,14 @@ public class GameService {
         vertex.setBuildable(false);
 
         player.addPoints(1);
+
         playerRepository.save(player);
 
+        if (game.getRoundNumber() ==1) {
+            addResources(player, vertex);
+        }
+
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers();
         gameWebSocketHandler.notifyAboutFetchingSettlements();
         gameWebSocketHandler.notifyAboutFetchingAvailableRoads();
     }
@@ -219,7 +239,6 @@ public class GameService {
                 .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
 
         Road road1 = board.getRoad(road.getStartVertex(), road.getEndVertex());
-        logger.info(road1.toString());
 
         if (road1 == null) {
             throw new IllegalStateException("Road not found");
@@ -231,9 +250,14 @@ public class GameService {
 
         road1.setOwnerId(player.getId());
         playerRepository.save(player);
-        logger.info(road1.toString());
+
         // add logic to count longest road for player
         gameWebSocketHandler.notifyAboutFetchingRoads();
+
+        if (game.getRoundNumber() <= 1) {
+            nextPlayer(gameId);
+        }
+        gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
     }
 
     public List<Vertex> getSettlementVertices(Long gameId) {
@@ -263,14 +287,26 @@ public class GameService {
                 .filter(vertex -> vertex.getOwnerId() != null && vertex.getOwnerId().equals(playerId))
                 .collect(Collectors.toList());
 
-        List<Road> playerRoads = board.getRoads().stream()
-                .filter(road -> road.getOwnerId() != null && road.getOwnerId().equals(playerId))
-                .toList();
+        List<Road> availableRoads = new ArrayList<>();
 
-        List<Road> availableRoads = board.getRoads().stream()
-                .filter(road -> isRoadAdjacentToPlayerVertex(road, playerVertices) || isRoadAdjacentToPlayerRoad(road, playerRoads))
-                .filter(road -> !road.isOccupied())
-                .collect(Collectors.toList());
+        boolean hasEnoughResources = player.getResources().getOrDefault(HexType.WOOD, 0) >= 1 &&
+                player.getResources().getOrDefault(HexType.BRICK, 0) >= 1;
+
+        if (game.getRoundNumber() <= 1) {
+            availableRoads = board.getRoads().stream()
+                    .filter(road -> isRoadAdjacentToPlayerVertex(road, playerVertices))
+                    .filter(road -> !road.isOccupied())
+                    .collect(Collectors.toList());
+        } else if (hasEnoughResources){
+            List<Road> playerRoads = board.getRoads().stream()
+                    .filter(road -> road.getOwnerId() != null && road.getOwnerId().equals(playerId))
+                    .toList();
+
+           availableRoads = board.getRoads().stream()
+                    .filter(road -> isRoadAdjacentToPlayerVertex(road, playerVertices) || isRoadAdjacentToPlayerRoad(road, playerRoads))
+                    .filter(road -> !road.isOccupied())
+                    .collect(Collectors.toList());
+        }
 
         return availableRoads;
     }
@@ -291,6 +327,11 @@ public class GameService {
         return playerVertices.contains(road.getStartVertex()) || playerVertices.contains(road.getEndVertex());
     }
 
+    private boolean isVertexAdjacentToPlayerRoad(Vertex vertex, List<Road> playerRoads) {
+        return playerRoads.stream()
+                .anyMatch(road -> road.getStartVertex().equals(vertex) || road.getEndVertex().equals(vertex));
+    }
+
     private boolean isRoadAdjacentToPlayerRoad(Road road, List<Road> playerRoads) {
         for (Road playerRoad : playerRoads) {
             if (road.getStartVertex().equals(playerRoad.getStartVertex()) ||
@@ -302,5 +343,38 @@ public class GameService {
         }
         return false;
     }
+
+    public void addResources(Player player, Vertex vertex) {
+        for (HexData hexData : vertex.getHexDataList()) {
+            HexType hexType = hexData.getType();
+            player.getResources().merge(hexType, 1, Integer::sum);
+        }
+        playerRepository.save(player);
+    }
+
+    public void nextPlayer(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        List<Player> players = game.getPlayers();
+        if (players.isEmpty()) {
+            throw new IllegalStateException("No players in the game.");
+        }
+
+        int currentIndex = game.getCurrentIndex();
+        int startRoundIndex = game.getStartRoundIndex();
+
+        currentIndex = (currentIndex + 1) % players.size();
+        game.setCurrentIndex(currentIndex);
+
+        if (currentIndex == startRoundIndex) {
+            game.addToRoundNumber();
+            gameWebSocketHandler.notifyAboutFetchingGameRound();
+        }
+
+        gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
+    }
 }
+
+
 
