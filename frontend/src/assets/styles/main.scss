@@ -217,5 +217,35 @@
   }
 }
 
+.dice {
+  width: 60px;
+  height: 60px;
+  background-color: whitesmoke;
+  color: black;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+  font-size: large;
+}
+
+.game-buttons-container {
+  position: absolute;
+  right: 10px;
+  bottom: 80px;
+  display: flex;
+  justify-content: end;
+}
+
+.game-buttons {
+  display: flex;
+  gap: 1em;
+}
+
+.next-button {
+  background-color: #3b82d3;
+  &:hover {
+    opacity: 0.7;
+  }
+}
 
 

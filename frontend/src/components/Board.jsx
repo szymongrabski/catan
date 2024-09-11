@@ -1,16 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import Hexagon from "./Hexagon.jsx";
 import { useGame } from "../context/GameContext.jsx";
-import {fetchData, placeRoad, placeSettlement} from "../api/authenticatedApi.js";
+import {fetchData, placeRoad, placeSettlement, upgradeSettlement} from "../api/authenticatedApi.js";
 import AvailableVertex from "./AvailableVertex.jsx";
 import Settlement from "./Settlement.jsx";
 import AvailableRoad from "./AvailableRoad.jsx";
 import Road from "./Road.jsx";
+import UpgradeVertex from "./UpgradeVertex.jsx";
 
 const size = 100;
 
-const Board = () => {
-    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound } = useGame();
+const colors = ['red', 'blue', 'cyan', 'magenta'];
+
+const Board = ({ diceNumber }) => {
+    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound, players } = useGame();
     const [availableVertices, setAvailableVertices] = useState([]);
 
 
@@ -20,7 +23,7 @@ const Board = () => {
             fetchAvailableVertices();
             fetchAvailableRoads();
         }
-    }, [currentPlayerIndex]);
+    }, [currentPlayerIndex, players]);
 
     const fetchAvailableVertices = async () => {
         const response = await fetchData(`game/${gameId}/${player.id}/available-vertices`);
@@ -35,6 +38,7 @@ const Board = () => {
         return settlements.filter(set => set.ownerId === player.id).length;
     }
 
+    const hasEnoughResourcesToUpgrade = players.filter(p => p.id === player.id && p.resources.WHEAT >= 2 && p.resources.ROCK >= 3).length > 0;
 
     const calculateVertexPosition = (q, r, direction) => {
         const width = Math.sqrt(3) * size;
@@ -57,6 +61,15 @@ const Board = () => {
         try {
             await placeSettlement(gameId, player.id, q, r, direction);
             fetchAvailableVertices();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const onUpgradeVertexClick = async (q, r, direction) => {
+        try {
+            console.log("klik")
+            await upgradeSettlement(gameId, player.id, q, r, direction);
         } catch (error) {
             console.error(error);
         }
@@ -102,6 +115,23 @@ const Board = () => {
                     );
                 })}
 
+                {currentPlayerIndex == player.id && gameRound > 1 && diceNumber !== 0 && availableVertices.map((vertex, vertexIndex) => {
+                    const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
+
+                    return (
+                        <AvailableVertex
+                            key={vertexIndex}
+                            x={vx}
+                            y={vy}
+                            q = {vertex.q}
+                            r = {vertex.r}
+                            direction = {vertex.direction}
+                            onClick={onAvailableVertexClick}
+                        />
+                    );
+                })}
+
+
                 {currentPlayerIndex == player.id && gameRound <= 1 && countPlayersRoads() < gameRound + 1 && countPlayersSettlements() > countPlayersRoads() && availableRoads.map((road, roadIndex) => (
                     <AvailableRoad
                         key={roadIndex}
@@ -111,27 +141,75 @@ const Board = () => {
                     />
                 ))}
 
-                {settlements.map((vertex, vertexIndex) => {
-                    const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
 
-                    return (
-                        <Settlement
-                            key={vertexIndex}
-                            x={vx}
-                            y={vy}
-                            color={"blue"}
-                        />
-                    );
-                })}
-
-                {roads.map((road, roadIndex) => (
-                    <Road
+                {currentPlayerIndex == player.id && gameRound > 1 && diceNumber !== 0 && availableRoads.map((road, roadIndex) => (
+                    <AvailableRoad
                         key={roadIndex}
                         road={road}
                         calculateVertexPosition={calculateVertexPosition}
-                        />
+                        onRoadClick={onRoadClick}
+                    />
                 ))}
 
+
+
+                { (diceNumber === 0 || (diceNumber !== 0 && !hasEnoughResourcesToUpgrade)) &&
+                    settlements.map((vertex, vertexIndex) => {
+                        const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
+                        const settlementColor = colors[vertex.ownerId % colors.length];
+                        return (
+                            <Settlement
+                                key={vertexIndex}
+                                x={vx}
+                                y={vy}
+                                color={settlementColor}
+                                upgraded={vertex.upgraded}
+                            />
+                        );
+                    })
+                }
+
+                { diceNumber !== 0 && hasEnoughResourcesToUpgrade &&
+                    settlements.map((vertex, vertexIndex) => {
+                        const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
+                        const settlementColor = colors[vertex.ownerId % colors.length];
+                        if (!vertex.upgraded && vertex.ownerId === player.id) {
+                            return (
+                                <UpgradeVertex
+                                    key={vertexIndex}
+                                    x={vx}
+                                    y={vy}
+                                    q = {vertex.q}
+                                    r = {vertex.r}
+                                    direction = {vertex.direction}
+                                    onClick={onUpgradeVertexClick}
+                                />
+                            )
+                        } else {
+                            return (
+                                <Settlement
+                                    key={vertexIndex}
+                                    x={vx}
+                                    y={vy}
+                                    color={settlementColor}
+                                    upgraded={vertex.upgraded}
+                                />
+                            );
+                        }
+                })}
+
+
+                {roads.map((road, roadIndex) => {
+                    const settlementColor = colors[ road.ownerId % colors.length];
+                    return (
+                        <Road
+                            key={roadIndex}
+                            road={road}
+                            calculateVertexPosition={calculateVertexPosition}
+                            color={settlementColor}
+                        />
+                    );
+                })}
             </svg>
         );
     }

@@ -122,9 +122,7 @@ export const GameProvider = ({ children }) => {
             ws.onmessage = (event) => {
                 if (event.data === 'fetch-players') {
                     fetchPlayers(gameId);
-                    console.log(players)
                 } else if (event.data === 'redirect') {
-                    console.log("REDIRECTING");
                     setIsReady(true);
                 } else if (event.data === 'fetch-settlements') {
                     fetchSettlements(gameId);
@@ -134,6 +132,7 @@ export const GameProvider = ({ children }) => {
                     fetchAvailableRoads(gameId);
                 } else if (event.data === 'fetch-current-player-index') {
                     fetchCurrentPlayerIndex();
+                    localStorage.setItem(`diceRoll_${gameId}`, 0);
                 } else if (event.data === 'fetch-game-round') {
                     fetchGameRound();
                 }

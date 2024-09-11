@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Road = ({ road, calculateVertexPosition }) => {
+const Road = ({ road, calculateVertexPosition, color }) => {
     const [midX, midY] = calculateMidpoint(road.startVertex, road.endVertex, calculateVertexPosition);
 
     const rectWidth = 80;
@@ -8,7 +8,7 @@ const Road = ({ road, calculateVertexPosition }) => {
 
     const angle = calculateAngle(road.startVertex, road.endVertex, calculateVertexPosition);
 
-    const rectX = midX - rectWidth / 2;
+    const rectX = midX - rectWidth / 2 + 5;
     const rectY = midY - rectHeight / 2;
 
     return (
@@ -17,7 +17,7 @@ const Road = ({ road, calculateVertexPosition }) => {
             y={rectY}
             width={rectWidth}
             height={rectHeight}
-            fill="blue"
+            fill={color}
             cursor="pointer"
             transform={`rotate(${angle}, ${midX}, ${midY})`}
         />

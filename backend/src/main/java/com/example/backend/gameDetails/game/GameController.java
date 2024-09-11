@@ -3,6 +3,7 @@ package com.example.backend.gameDetails.game;
 import com.example.backend.gameDetails.board.Board;
 import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
+import com.example.backend.gameDetails.board.Vertex.VertexRequest;
 import com.example.backend.gameDetails.player.PlayerDTO;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -155,5 +156,23 @@ public class GameController {
             logger.info(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/{gameId}/dice/{diceRoll}")
+    public ResponseEntity<String> rollDice(@PathVariable Long gameId, @PathVariable int diceRoll) {
+        gameService.addResourcesAfterDiceRoll(gameId, diceRoll);
+        return ResponseEntity.ok("Resources updated after dice roll.");
+    }
+
+    @PostMapping("{gameId}/next")
+    public ResponseEntity<String> setNextPlayer(@PathVariable Long gameId) {
+        gameService.nextPlayer(gameId);
+        return ResponseEntity.ok("Next round successfully");
+    }
+
+    @PostMapping("{gameId}/{playerId}/settlements/upgrade")
+    public ResponseEntity<String> upgradeSettlement(@PathVariable Long gameId, @PathVariable Long playerId, @RequestBody VertexRequest vertexRequest) {
+        gameService.upgradeSettlement(gameId, playerId, vertexRequest.getQ(), vertexRequest.getR(), vertexRequest.getDirection());
+        return ResponseEntity.ok("Settlement upgraded successfully");
     }
 }

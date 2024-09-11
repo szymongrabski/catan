@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -102,6 +103,7 @@ public class GameService {
             }
 
             gameWebSocketHandler.notifyAboutRedirection();
+            gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game with ID " + gameId + " not found");
         }
@@ -179,9 +181,10 @@ public class GameService {
                 List<Road> playerRoads = board.getRoads().stream()
                         .filter(road -> road.getOwnerId() != null && road.getOwnerId().equals(playerId))
                         .collect(Collectors.toList());
+
                 return board.getVertices().stream()
                         .filter(vertex -> vertex.isBuildable() && isVertexAdjacentToPlayerRoad(vertex, playerRoads))
-                        .collect(Collectors.toList());
+                        .toList();
             }
             return new ArrayList<>();
         } else {
@@ -220,7 +223,7 @@ public class GameService {
 
         playerRepository.save(player);
 
-        if (game.getRoundNumber() ==1) {
+        if (game.getRoundNumber() == 1) {
             addResources(player, vertex);
         }
 
@@ -248,16 +251,28 @@ public class GameService {
             throw new IllegalStateException("Road is occupied");
         }
 
+        if (game.getRoundNumber() > 1) {
+            Integer wood = player.getResources().getOrDefault(HexType.WOOD, 0);
+            Integer brick = player.getResources().getOrDefault(HexType.BRICK, 0);
+
+            if (wood < 1 || brick < 1) {
+                throw new IllegalStateException("Not enough resources to build a road");
+            }
+
+            player.getResources().put(HexType.WOOD, wood - 1);
+            player.getResources().put(HexType.BRICK, brick - 1);
+        }
+
         road1.setOwnerId(player.getId());
         playerRepository.save(player);
 
         // add logic to count longest road for player
         gameWebSocketHandler.notifyAboutFetchingRoads();
-
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers();
         if (game.getRoundNumber() <= 1) {
             nextPlayer(gameId);
+            gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
         }
-        gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
     }
 
     public List<Vertex> getSettlementVertices(Long gameId) {
@@ -373,6 +388,71 @@ public class GameService {
         }
 
         gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
+    }
+
+
+    public void addResourcesAfterDiceRoll(Long gameId, int diceRoll) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+        List<Player> players = playerRepository.findByGameId(gameId);
+
+        Board board = game.getBoard();
+        if (board == null) {
+            throw new IllegalStateException("Board not initialized for game with ID " + gameId);
+        }
+
+        List<Vertex> verticesWithRolledNumber = board.getVertices().stream()
+                .filter(vertex -> vertex.getHexDataList().stream()
+                        .anyMatch(hexData -> hexData.getNumber().getValue() == diceRoll))
+                .toList();
+
+        verticesWithRolledNumber.forEach(vertex -> {
+            Player player = players.stream()
+                    .filter(p -> p.getId().equals(vertex.getOwnerId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (player != null) {
+                vertex.getHexDataList().stream()
+                        .filter(hexData -> hexData.getNumber().getValue() == diceRoll)
+                        .forEach(hexData -> player.getResources().merge(hexData.getType(), 1, Integer::sum));
+
+                playerRepository.save(player);
+            }
+        });
+
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers();
+    }
+
+    public void upgradeSettlement(Long gameId, Long playerId, int q, int r, String direction) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+        Vertex vertex = game.getBoard().getVertex(q, r, direction);
+
+        if (!Objects.equals(vertex.getOwnerId(), player.getId())) {
+            throw new IllegalStateException("Player with ID " + playerId + " is not owner of the vertex");
+        }
+
+        Integer wheat = player.getResources().getOrDefault(HexType.WHEAT, 0);
+        Integer rock = player.getResources().getOrDefault(HexType.ROCK, 0);
+
+        if (wheat < 2 || rock < 3) {
+            throw new IllegalStateException("Not enough resources to upgrade settlement");
+        }
+
+        player.getResources().put(HexType.WHEAT, wheat  - 2);
+        player.getResources().put(HexType.ROCK, rock - 3);
+
+        vertex.setUpgraded(true);
+
+        playerRepository.save(player);
+
+        gameWebSocketHandler.notifyAboutFetchingSettlements();
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers();
     }
 }
 

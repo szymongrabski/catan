@@ -17,6 +17,7 @@ public class Vertex {
 
     private Long ownerId;
     private boolean buildable;
+    private boolean isUpgraded;
 
 
     public Vertex(int q, int r, String direction) {
@@ -26,6 +27,7 @@ public class Vertex {
         this.hexDataList = new ArrayList<>();
         this.ownerId = null;
         this.buildable = true;
+        this.isUpgraded = false;
     }
 
     public boolean isAdjacentTo(Vertex other) {
@@ -72,6 +74,14 @@ public class Vertex {
 
     public List<HexData> getHexDataList() {
         return hexDataList;
+    }
+
+    public boolean isUpgraded() {
+        return isUpgraded;
+    }
+
+    public void setUpgraded(boolean upgraded) {
+        isUpgraded = upgraded;
     }
 
     @Override

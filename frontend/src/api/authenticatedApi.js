@@ -245,8 +245,6 @@ export async function placeRoad(gameId, playerId, road) {
         console.error('No authentication token found');
     }
 
-    console.log(road)
-
     const config = {
         headers: {
             Authorization: `Bearer ${authToken}`
@@ -261,3 +259,70 @@ export async function placeRoad(gameId, playerId, road) {
         throw error;
     }
 }
+
+export async function rollDiceForResources(gameId, diceNumber) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/${gameId}/dice/${diceNumber}`, null,  config);
+        return response;
+    } catch (error) {
+        console.error('Error while creating road:', error);
+        throw error;
+    }
+}
+
+export async function setNextPLayer(gameId, diceNumber) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/${gameId}/next`, null,  config);
+        return response;
+    } catch (error) {
+        console.error('Error while creating road:', error);
+        throw error;
+    }
+}
+
+export async function upgradeSettlement(gameId, playerId, q, r, direction) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+        }
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/game/${gameId}/${playerId}/settlements/upgrade`, {
+            q, r, direction
+        },  config);
+        return response;
+    } catch (error) {
+        console.error('Error while updating vertex:', error);
+        throw error;
+    }
+}
+
+
