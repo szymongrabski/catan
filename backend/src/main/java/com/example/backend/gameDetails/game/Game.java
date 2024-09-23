@@ -25,6 +25,8 @@ public class Game {
 
     private int roundNumber;
 
+    private int diceNumber;
+
 
     public Game() {
         this.id = ID_GENERATOR.getAndIncrement();
@@ -32,6 +34,7 @@ public class Game {
         this.gameStatus = GameStatus.NOT_STARTED;
         this.currentIndex = 0;
         this.roundNumber = 0;
+        this.diceNumber = 0;
     }
 
     public Long getId() {
@@ -80,6 +83,14 @@ public class Game {
 
     public int getCurrentIndex() {
         return currentIndex;
+    }
+
+    public int getDiceNumber() {
+        return diceNumber;
+    }
+
+    public void setDiceNumber(int diceNumber) {
+        this.diceNumber = diceNumber;
     }
 
     public void startGame() {

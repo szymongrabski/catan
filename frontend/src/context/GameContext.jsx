@@ -19,6 +19,8 @@ export const GameProvider = ({ children }) => {
     const [roads, setRoads] = useState([]);
     const [availableRoads, setAvailableRoads] = useState([]);
     const [gameRound, setGameRound] = useState(0);
+    const [diceNumber, setDiceNumber] = useState(0);
+
 
     const fetchPlayer = async () => {
         if (!gameId) return;
@@ -81,6 +83,11 @@ export const GameProvider = ({ children }) => {
         setGameRound(response);
     }
 
+    const fetchDiceNumber = async () => {
+        const response = await fetchData(`game/${gameId}/dice`);
+        setDiceNumber(response);
+    }
+
     const isPlayersTurn = () => {
         return player.id === currentPlayerIndex
     }
@@ -96,7 +103,8 @@ export const GameProvider = ({ children }) => {
                 fetchSettlements(gameId),
                 fetchRoads(gameId),
                 fetchGameRound(),
-                fetchCurrentPlayerIndex()
+                fetchCurrentPlayerIndex(),
+                fetchDiceNumber(),
             ]);
         } catch (err) {
             setError('Failed to fetch game data');
@@ -132,9 +140,10 @@ export const GameProvider = ({ children }) => {
                     fetchAvailableRoads(gameId);
                 } else if (event.data === 'fetch-current-player-index') {
                     fetchCurrentPlayerIndex();
-                    localStorage.setItem(`diceRoll_${gameId}`, 0);
                 } else if (event.data === 'fetch-game-round') {
                     fetchGameRound();
+                } else if (event.data === 'fetch-dice-number') {
+                    fetchDiceNumber();
                 }
             };
 
@@ -151,7 +160,7 @@ export const GameProvider = ({ children }) => {
     }, [player]);
 
     return (
-        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads, gameRound}}>
+        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads, gameRound, diceNumber}}>
             { children }
         </GameContext.Provider>
     );

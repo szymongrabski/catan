@@ -12,7 +12,7 @@ function LoginPage() {
                     <img src={logo} alt="logo" className="logo"/>
                 </div>
                 <div>
-                    <h2 className="form-title">Login</h2>
+                    <h2 className="form-title">Log in</h2>
                     <LoginForm/>
                 </div>
                 <div>

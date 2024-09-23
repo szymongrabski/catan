@@ -260,7 +260,7 @@ export async function placeRoad(gameId, playerId, road) {
     }
 }
 
-export async function rollDiceForResources(gameId, diceNumber) {
+export async function rollDiceForResources(gameId) {
     const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
         console.error('No authentication token found');
@@ -273,7 +273,9 @@ export async function rollDiceForResources(gameId, diceNumber) {
     }
 
     try {
-        const response = await axios.post(`${API_URL}/game/${gameId}/dice/${diceNumber}`, null,  config);
+        const response = await axios.post(`${API_URL}/game/${gameId}/dice`, null,  config);
+        console.log("rolluje" + response)
+        console.log(response)
         return response;
     } catch (error) {
         console.error('Error while creating road:', error);
@@ -281,7 +283,7 @@ export async function rollDiceForResources(gameId, diceNumber) {
     }
 }
 
-export async function setNextPLayer(gameId, diceNumber) {
+export async function setNextPLayer(gameId) {
     const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
         console.error('No authentication token found');
@@ -321,6 +323,33 @@ export async function upgradeSettlement(gameId, playerId, q, r, direction) {
         return response;
     } catch (error) {
         console.error('Error while updating vertex:', error);
+        throw error;
+    }
+}
+
+export async function substractResources(gameId, playerId, resourcesToGive) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    console.log(resourcesToGive)
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+        }
+    }
+
+    try {
+        const response = await axios.patch(
+            `${API_URL}/game/${gameId}/${playerId}/resources`,
+            JSON.stringify(resourcesToGive),
+            config);
+        return response;
+    } catch (error) {
+        console.error('Error while substracting resources:', error);
         throw error;
     }
 }

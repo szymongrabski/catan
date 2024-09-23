@@ -49,6 +49,7 @@ const UserSearch = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
+                    className="input"
                 />
                 <button type="submit">Search</button>
                 {error || users.length > 0 ? (
@@ -57,8 +58,6 @@ const UserSearch = () => {
                     </button>
                 ) : null}
             </form>
-
-            <h5>Search Results:</h5>
             {error && <p className="error">{error}</p>}
             <ul>
                 {users.map((user) => (

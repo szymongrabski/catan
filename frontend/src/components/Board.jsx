@@ -7,15 +7,20 @@ import Settlement from "./Settlement.jsx";
 import AvailableRoad from "./AvailableRoad.jsx";
 import Road from "./Road.jsx";
 import UpgradeVertex from "./UpgradeVertex.jsx";
+import InviteModal from "./InviteModal.jsx";
+import SevenModal from "./SevenModal.jsx";
 
 const size = 100;
 
 const colors = ['red', 'blue', 'cyan', 'magenta'];
 
-const Board = ({ diceNumber }) => {
-    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound, players } = useGame();
+const Board = () => {
+    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound, players, diceNumber } = useGame();
     const [availableVertices, setAvailableVertices] = useState([]);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
     useEffect(() => {
         fetchCurrentPlayerIndex()
@@ -99,6 +104,15 @@ const Board = ({ diceNumber }) => {
                     />
                 ))}
 
+                {diceNumber === 7 && (
+                    <SevenModal
+                        isOpen={true}
+                        onRequestClose={closeModal}
+                        player={players.filter(p => p.id === player.id)[0]}
+                        gameId={gameId}
+                    />
+                )}
+
                 {currentPlayerIndex == player.id && gameRound <= 1 && countPlayersSettlements() < gameRound + 1 && availableVertices.map((vertex, vertexIndex) => {
                     const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
 
@@ -173,7 +187,7 @@ const Board = ({ diceNumber }) => {
                     settlements.map((vertex, vertexIndex) => {
                         const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
                         const settlementColor = colors[vertex.ownerId % colors.length];
-                        if (!vertex.upgraded && vertex.ownerId === player.id) {
+                        if (!vertex.upgraded && vertex.ownerId === player.id && currentPlayerIndex === player.id) {
                             return (
                                 <UpgradeVertex
                                     key={vertexIndex}

@@ -1,5 +1,10 @@
 import { useGame } from "../context/GameContext.jsx";
-import {useEffect} from "react";
+import wood from "../assets/wood.svg";
+import sheep from "../assets/sheep.svg";
+import brick from "../assets/brick.svg";
+import wheat from "../assets/wheat.svg";
+import rock from "../assets/rock.svg";
+
 
 const typeColors = {
     WOOD: '#295727',
@@ -18,24 +23,34 @@ const ResourcePanel = () => {
     if (currentPlayer) {
         return (
             <div className="resource-panel">
-                <div style={{ backgroundColor: typeColors.WOOD }}>
-                    <p>Wood</p>
+                <div style={{backgroundColor: typeColors.WOOD}} className="resource-panel-item">
+                    <div className="resource-icon-container">
+                        <img src={wood} alt="wood" className="resource-icon"/>
+                    </div>
                     <p>{currentPlayer.resources.WOOD}</p>
                 </div>
-                <div style={{ backgroundColor: typeColors.BRICK }}>
-                    <p>Brick</p>
+                <div style={{backgroundColor: typeColors.BRICK}} className="resource-panel-item">
+                    <div className="resource-icon-container">
+                        <img src={brick} alt="brick" className="resource-icon"/>
+                    </div>
                     <p>{currentPlayer.resources.BRICK}</p>
                 </div>
-                <div style={{ backgroundColor: typeColors.WOOL }}>
-                    <p>Wool</p>
+                <div style={{backgroundColor: typeColors.WOOL}} className="resource-panel-item">
+                    <div className="resource-icon-container">
+                    <img src={sheep} alt="sheep" className="resource-icon"/>
+                    </div>
                     <p>{currentPlayer.resources.WOOL}</p>
                 </div>
-                <div style={{ backgroundColor: typeColors.WHEAT }}>
-                    <p>Wheat</p>
+                <div style={{backgroundColor: typeColors.WHEAT}} className="resource-panel-item">
+                    <div className="resource-icon-container">
+                        <img src={wheat} alt="wheat" className="resource-icon"/>
+                    </div>
                     <p>{currentPlayer.resources.WHEAT}</p>
                 </div>
-                <div style={{ backgroundColor: typeColors.ROCK }}>
-                    <p>Rock</p>
+                <div style={{backgroundColor: typeColors.ROCK}} className="resource-panel-item">
+                    <div className="resource-icon-container">
+                        <img src={rock} alt="rock" className="resource-icon"/>
+                    </div>
                     <p>{currentPlayer.resources.ROCK}</p>
                 </div>
             </div>

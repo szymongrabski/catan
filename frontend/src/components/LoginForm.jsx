@@ -34,13 +34,13 @@ function LoginForm() {
                 <Form className="form">
                     <div className="field-container">
                         <label htmlFor="username">Username</label>
-                        <Field name="username" type="text" id="username" />
+                        <Field name="username" type="text" id="username" className="input" />
                         {errors.username && touched.username ? <div className="error">{errors.username}</div> : null}
                     </div>
 
                     <div className="field-container">
                         <label htmlFor="password">Password</label>
-                        <Field name="password" type="password" id="password" />
+                        <Field name="password" type="password" id="password" className="input" />
                         {errors.password && touched.password ? <div className="error">{errors.password}</div> : null}
                     </div>
 

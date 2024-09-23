@@ -20,10 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -211,6 +208,14 @@ public class GameService {
             throw new IllegalStateException("Vertex is not buildable");
         }
 
+        boolean hasEnoughResources = player.getResources().getOrDefault(HexType.WOOD, 0) >= 1 &&
+                player.getResources().getOrDefault(HexType.BRICK, 0) >= 1 && player.getResources().getOrDefault(HexType.WOOL, 0) >= 1
+                && player.getResources().getOrDefault(HexType.WHEAT, 0) >= 1;
+
+        if (game.getRoundNumber() > 1 && !hasEnoughResources) {
+            throw new IllegalStateException("Not enough resources");
+        }
+
         List<Vertex> adjacentVertices = board.getAdjacentVertices(vertex);
         for (Vertex adjacentVertex : adjacentVertices) {
             adjacentVertex.setBuildable(false);
@@ -218,6 +223,17 @@ public class GameService {
 
         vertex.setOwnerId(player.getId());
         vertex.setBuildable(false);
+
+        if (game.getRoundNumber() > 1) {
+            Integer wood = player.getResources().getOrDefault(HexType.WOOD, 0);
+            Integer brick = player.getResources().getOrDefault(HexType.BRICK, 0);
+            Integer wool = player.getResources().getOrDefault(HexType.WOOL, 0);
+            Integer wheat = player.getResources().getOrDefault(HexType.WHEAT, 0);;
+            player.getResources().put(HexType.WOOD, wood - 1);
+            player.getResources().put(HexType.BRICK, brick - 1);
+            player.getResources().put(HexType.WOOL, wool - 1);
+            player.getResources().put(HexType.WHEAT, wheat - 1);
+        }
 
         player.addPoints(1);
 
@@ -387,14 +403,19 @@ public class GameService {
             gameWebSocketHandler.notifyAboutFetchingGameRound();
         }
 
+        game.setDiceNumber(0);
+
+        gameWebSocketHandler.notifyAboutFetchingDiceNumber();
         gameWebSocketHandler.notifyAboutFetchingCurrentPlayerIndex();
     }
 
 
-    public void addResourcesAfterDiceRoll(Long gameId, int diceRoll) {
+    public void addResourcesAfterDiceRoll(Long gameId) {
         Game game = getGameById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
         List<Player> players = playerRepository.findByGameId(gameId);
+
+        int diceRoll = game.getDiceNumber();
 
         Board board = game.getBoard();
         if (board == null) {
@@ -415,11 +436,42 @@ public class GameService {
             if (player != null) {
                 vertex.getHexDataList().stream()
                         .filter(hexData -> hexData.getNumber().getValue() == diceRoll)
-                        .forEach(hexData -> player.getResources().merge(hexData.getType(), 1, Integer::sum));
+                        .forEach(hexData -> {
+                            int resourceAmount = vertex.isUpgraded() ? 2 : 1;
+                            player.getResources().merge(hexData.getType(), resourceAmount, Integer::sum);
+                        });
 
                 playerRepository.save(player);
             }
         });
+
+        gameWebSocketHandler.notifyUserAboutFetchingPlayers();
+    }
+
+    public void substarctResources(Long gameId, Long playerId, Map<HexType, Integer> resourcesToRemove) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        int diceRoll = game.getDiceNumber();
+
+        Board board = game.getBoard();
+        if (board == null) {
+            throw new IllegalStateException("Board not initialized for game with ID " + gameId);
+        }
+
+        Player player = playerRepository.findByIdAndGameId(playerId, gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Player with ID " + playerId + " not found"));
+
+        resourcesToRemove.forEach((resourceType, amountToRemove) -> {
+            Integer currentAmount = player.getResources().getOrDefault(resourceType, 0);
+
+            if (currentAmount < amountToRemove) {
+                throw new IllegalArgumentException("Not enough resources for player with ID " + playerId + " to remove " + amountToRemove + " of " + resourceType);
+            }
+            player.getResources().merge(resourceType, -amountToRemove, Integer::sum);
+        });
+
+        playerRepository.save(player);
 
         gameWebSocketHandler.notifyUserAboutFetchingPlayers();
     }
@@ -446,6 +498,7 @@ public class GameService {
 
         player.getResources().put(HexType.WHEAT, wheat  - 2);
         player.getResources().put(HexType.ROCK, rock - 3);
+        player.addPoints(1);
 
         vertex.setUpgraded(true);
 
@@ -453,6 +506,24 @@ public class GameService {
 
         gameWebSocketHandler.notifyAboutFetchingSettlements();
         gameWebSocketHandler.notifyUserAboutFetchingPlayers();
+    }
+
+    public void rollDice(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        int number1 = (int) (Math.random() * 6) + 1;
+        int number2 = (int) (Math.random() * 6) + 1;
+
+        game.setDiceNumber(number1 + number2);
+
+        gameWebSocketHandler.notifyAboutFetchingDiceNumber();
+    }
+
+    public int getDiceNumber(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+        return game.getDiceNumber();
     }
 }
 

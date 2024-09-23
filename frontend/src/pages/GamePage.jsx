@@ -10,31 +10,27 @@ import {faArrowRight, faArrowRightArrowLeft, faDice} from "@fortawesome/free-sol
 
 function GamePage() {
     const { gameId } = useParams()
-    const { setGameId, loading, player, currentPlayerIndex, gameRound } = useGame();
-    const [diceNumber, setDiceNumber] = useState(() => {
-        const savedDiceNumber = localStorage.getItem(`diceRoll_${gameId}`);
-        return savedDiceNumber ? parseInt(savedDiceNumber) : 0;
-    });
+    const { setGameId, loading, player, currentPlayerIndex, gameRound, diceNumber } = useGame();
+    const [isRolling, setIsRolling] = useState(false);
 
     useEffect(() => {
         setGameId(gameId)
     }, [gameId])
 
     const rollDice = async () => {
-        const die1 = Math.floor(Math.random() * 6) + 1;
-        const die2 = Math.floor(Math.random() * 6) + 1;
-        const newDiceNumber = die1 + die2
-        setDiceNumber(newDiceNumber);
-        localStorage.setItem(`diceRoll_${gameId}`, newDiceNumber);
-        await rollDiceForResources(gameId, newDiceNumber);
+        setIsRolling(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        await rollDiceForResources(gameId);
+        setIsRolling(false);
     };
 
     const nextPlayer = async (diceNumber) => {
         setNextPLayer(gameId, diceNumber)
-        setDiceNumber(0);
     }
 
-    const isButtonDisabled = diceNumber !== 0;
+    const isButtonDisabled = diceNumber !== 0 || isRolling;
 
     if (!loading) {
         return (
@@ -43,12 +39,21 @@ function GamePage() {
                 <Board diceNumber={diceNumber}/>
                 <div className="game-buttons-container">
                     <div className="game-buttons">
-                        {diceNumber !== 0 && (
+                        {diceNumber !== 0 && currentPlayerIndex === player.id && (
                             <button className="next-button" onClick={() => nextPlayer(diceNumber)}><FontAwesomeIcon icon={faArrowRight}/></button>
                         )}
                         {currentPlayerIndex === player.id && gameRound > 1 && (
-                            <button className="dice" disabled={isButtonDisabled}
-                                    style={{opacity: isButtonDisabled ? 0.5 : 1}} onClick={rollDice}>
+                            <button className={`dice ${isRolling ? 'shaking' : ''}`}
+                                    disabled={isButtonDisabled}
+                                    style={{opacity: isButtonDisabled ? 0.5 : 1}}
+                                    onClick={rollDice}>
+                                {isRolling ? '' :  diceNumber || 'Roll'}
+                            </button>
+                        )}
+
+                        {currentPlayerIndex !== player.id && gameRound > 1 && diceNumber !== 0 && (
+                            <button className={`dice`}
+                                    disabled={true}>
                                 {diceNumber}
                             </button>
                         )}

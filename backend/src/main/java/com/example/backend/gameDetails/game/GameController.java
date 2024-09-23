@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Hex.HexType;
 import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.board.Vertex.VertexRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/game")
@@ -158,9 +160,16 @@ public class GameController {
         }
     }
 
-    @PostMapping("/{gameId}/dice/{diceRoll}")
-    public ResponseEntity<String> rollDice(@PathVariable Long gameId, @PathVariable int diceRoll) {
-        gameService.addResourcesAfterDiceRoll(gameId, diceRoll);
+    @GetMapping("/{gameId}/dice")
+    public ResponseEntity<Integer> getDiceNumber(@PathVariable Long gameId) {
+        int diceNumber = gameService.getDiceNumber(gameId);
+        return ResponseEntity.ok(diceNumber);
+    }
+
+    @PostMapping("{gameId}/dice")
+    public ResponseEntity<String> rollDice(@PathVariable Long gameId) {
+        gameService.rollDice(gameId);
+        gameService.addResourcesAfterDiceRoll(gameId);
         return ResponseEntity.ok("Resources updated after dice roll.");
     }
 
@@ -174,5 +183,23 @@ public class GameController {
     public ResponseEntity<String> upgradeSettlement(@PathVariable Long gameId, @PathVariable Long playerId, @RequestBody VertexRequest vertexRequest) {
         gameService.upgradeSettlement(gameId, playerId, vertexRequest.getQ(), vertexRequest.getR(), vertexRequest.getDirection());
         return ResponseEntity.ok("Settlement upgraded successfully");
+    }
+
+    @PatchMapping("/{gameId}/{playerId}/resources")
+    public ResponseEntity<Void> removePlayerResources(@PathVariable Long gameId,
+                                                      @PathVariable Long playerId,
+                                                      @RequestBody Map<String, Integer> resourcesToRemove) {
+        try {
+            Map<HexType, Integer> hexResources = resourcesToRemove.entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> HexType.valueOf(entry.getKey().toUpperCase()),
+                            entry -> entry.getValue()
+                    ));
+
+            gameService.substarctResources(gameId, playerId, hexResources);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

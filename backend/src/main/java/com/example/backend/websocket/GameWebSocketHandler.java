@@ -112,6 +112,18 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void notifyAboutFetchingDiceNumber() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-dice-number"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 
 
     private String extractGameIdFromQuery(String query) {
