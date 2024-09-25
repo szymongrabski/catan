@@ -7,7 +7,6 @@ import Settlement from "./Settlement.jsx";
 import AvailableRoad from "./AvailableRoad.jsx";
 import Road from "./Road.jsx";
 import UpgradeVertex from "./UpgradeVertex.jsx";
-import InviteModal from "./InviteModal.jsx";
 import SevenModal from "./SevenModal.jsx";
 
 const size = 100;
@@ -15,12 +14,14 @@ const size = 100;
 const colors = ['red', 'blue', 'cyan', 'magenta'];
 
 const Board = () => {
-    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound, players, diceNumber } = useGame();
+    const { gameId, board, player, currentPlayerIndex, fetchCurrentPlayerIndex, settlements, availableRoads, roads, fetchAvailableRoads, gameRound, players, diceNumber, robberHex, isRobberPlaced } = useGame();
     const [availableVertices, setAvailableVertices] = useState([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
+    const closeModal = () => {
+        setIsModalOpen(false);
+    }
 
     useEffect(() => {
         fetchCurrentPlayerIndex()
@@ -93,16 +94,19 @@ const Board = () => {
     if (board) {
         return (
             <svg width="80%" height="80%" viewBox="-580 -200 1500 1000">
-                {board.hexes.map((hex, hexIndex) => (
-                    <Hexagon
-                        key={`${hex.q}-${hex.r}`}
-                        q={hex.q}
-                        r={hex.r}
-                        size={size}
-                        type={hex.type}
-                        number={hex.number}
-                    />
-                ))}
+                {board.hexes.map((hex, hexIndex) => {
+                    const isRobber = hex.q === robberHex.q && hex.r === robberHex.r;
+                    return (
+                        <Hexagon
+                            key={`${hex.q}-${hex.r}`}
+                            q={hex.q}
+                            r={hex.r}
+                            size={size}
+                            type={hex.type}
+                            number={hex.number}
+                            isRobber={isRobber}
+                        />
+                    )})}
 
                 {diceNumber === 7 && (
                     <SevenModal
@@ -112,6 +116,13 @@ const Board = () => {
                         gameId={gameId}
                     />
                 )}
+
+                {diceNumber === 7 && !isModalOpen && (
+                    <div className="modal">
+                        test
+                    </div>
+                )}
+
 
                 {currentPlayerIndex == player.id && gameRound <= 1 && countPlayersSettlements() < gameRound + 1 && availableVertices.map((vertex, vertexIndex) => {
                     const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
@@ -129,7 +140,7 @@ const Board = () => {
                     );
                 })}
 
-                {currentPlayerIndex == player.id && gameRound > 1 && diceNumber !== 0 && availableVertices.map((vertex, vertexIndex) => {
+                {currentPlayerIndex == player.id && gameRound > 1 && diceNumber !== 0 && isRobberPlaced && availableVertices.map((vertex, vertexIndex) => {
                     const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
 
                     return (
@@ -156,7 +167,7 @@ const Board = () => {
                 ))}
 
 
-                {currentPlayerIndex == player.id && gameRound > 1 && diceNumber !== 0 && availableRoads.map((road, roadIndex) => (
+                {currentPlayerIndex == player.id && gameRound > 1 && diceNumber !== 0 && isRobberPlaced && availableRoads.map((road, roadIndex) => (
                     <AvailableRoad
                         key={roadIndex}
                         road={road}
@@ -187,7 +198,7 @@ const Board = () => {
                     settlements.map((vertex, vertexIndex) => {
                         const [vx, vy] = calculateVertexPosition(vertex.q, vertex.r, vertex.direction);
                         const settlementColor = colors[vertex.ownerId % colors.length];
-                        if (!vertex.upgraded && vertex.ownerId === player.id && currentPlayerIndex === player.id) {
+                        if (!vertex.upgraded && vertex.ownerId === player.id && isRobberPlaced && currentPlayerIndex === player.id) {
                             return (
                                 <UpgradeVertex
                                     key={vertexIndex}

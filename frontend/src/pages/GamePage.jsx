@@ -10,10 +10,11 @@ import {faArrowRight, faArrowRightArrowLeft, faDice} from "@fortawesome/free-sol
 
 function GamePage() {
     const { gameId } = useParams()
-    const { setGameId, loading, player, currentPlayerIndex, gameRound, diceNumber } = useGame();
+    const { setGameId, loading, player, currentPlayerIndex, gameRound, diceNumber, isRobberPlaced, robberHex } = useGame();
     const [isRolling, setIsRolling] = useState(false);
 
     useEffect(() => {
+        console.log("robber Hex", robberHex)
         setGameId(gameId)
     }, [gameId])
 

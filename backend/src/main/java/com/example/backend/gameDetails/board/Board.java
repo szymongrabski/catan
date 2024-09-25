@@ -203,6 +203,15 @@ public class Board {
         return null;
     }
 
+    public Hex getHex(int q, int r) {
+        for (Hex hex : hexes) {
+            if (hex.getQ() == q && hex.getR() == r) {
+                return hex;
+            }
+        }
+        return null;
+    }
+
     public Road getRoad(Vertex startVertex, Vertex endVertex) {
         for (Road road : roads) {
             if ((road.getStartVertex().equals(startVertex) && road.getEndVertex().equals(endVertex)) ||

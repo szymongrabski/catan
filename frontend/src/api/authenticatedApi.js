@@ -333,8 +333,6 @@ export async function substractResources(gameId, playerId, resourcesToGive) {
         console.error('No authentication token found');
     }
 
-    console.log(resourcesToGive)
-
     const config = {
         headers: {
             Authorization: `Bearer ${authToken}`,
@@ -350,6 +348,32 @@ export async function substractResources(gameId, playerId, resourcesToGive) {
         return response;
     } catch (error) {
         console.error('Error while substracting resources:', error);
+        throw error;
+    }
+}
+
+export async function placeRobber(gameId, q, r) {
+    const authToken = sessionStorage.getItem('authToken');
+    if (!authToken) {
+        console.error('No authentication token found');
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    }
+
+    const data = { q, r };
+
+    try {
+        const response = await axios.patch(
+            `${API_URL}/game/${gameId}/robber`,
+            data,
+            config);
+        return response;
+    } catch (error) {
+        console.error('Error while placing robber:', error);
         throw error;
     }
 }

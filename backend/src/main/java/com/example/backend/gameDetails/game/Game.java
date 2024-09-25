@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Hex.Hex;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
 import com.example.backend.gameDetails.player.Player;
 
@@ -27,6 +28,9 @@ public class Game {
 
     private int diceNumber;
 
+    private Hex robberHex;
+
+    private boolean isRobberPlaced;
 
     public Game() {
         this.id = ID_GENERATOR.getAndIncrement();
@@ -35,6 +39,8 @@ public class Game {
         this.currentIndex = 0;
         this.roundNumber = 0;
         this.diceNumber = 0;
+        this.robberHex = null;
+        this.isRobberPlaced = false;
     }
 
     public Long getId() {
@@ -91,6 +97,22 @@ public class Game {
 
     public void setDiceNumber(int diceNumber) {
         this.diceNumber = diceNumber;
+    }
+
+    public Hex getRobberHex() {
+        return robberHex;
+    }
+
+    public void setRobberHex(Hex robberHex) {
+        this.robberHex = robberHex;
+    }
+
+    public boolean getIsRobberPlaced() {
+        return isRobberPlaced;
+    }
+
+    public void setIsRobberPlaced(boolean isRobberPlaced) {
+        this.isRobberPlaced = isRobberPlaced;
     }
 
     public void startGame() {

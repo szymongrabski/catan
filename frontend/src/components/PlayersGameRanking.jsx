@@ -21,7 +21,7 @@ const PlayersGameRanking = () => {
                                 )}
                                 {player.user.username}
                             </p>
-                            <p>
+                            <p style={{color: calculateTotalResources(player.resources) > 7 ? '#BD1E1E' : 'white'}}>
                                 <FontAwesomeIcon icon={faBoxes}/> {calculateTotalResources(player.resources)}
                             </p>
                             <p>

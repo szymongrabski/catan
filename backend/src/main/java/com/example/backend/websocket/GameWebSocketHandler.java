@@ -124,7 +124,29 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void notifyAboutFetchingRobber() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-robber"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
+    public void notifyAboutFetchingIsRobberPlaced() {
+        for (WebSocketSession session : sessions.values()) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage("fetch-is-robber-placed"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     private String extractGameIdFromQuery(String query) {
         if (query != null) {

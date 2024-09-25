@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Hex.Hex;
 import com.example.backend.gameDetails.board.Hex.HexData;
 import com.example.backend.gameDetails.board.Hex.HexType;
 import com.example.backend.gameDetails.board.Road.Road;
@@ -517,6 +518,11 @@ public class GameService {
 
         game.setDiceNumber(number1 + number2);
 
+        if (number1 + number2 == 7) {
+            game.setIsRobberPlaced(false);
+            gameWebSocketHandler.notifyAboutFetchingIsRobberPlaced();
+        }
+
         gameWebSocketHandler.notifyAboutFetchingDiceNumber();
     }
 
@@ -524,6 +530,38 @@ public class GameService {
         Game game = getGameById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
         return game.getDiceNumber();
+    }
+
+    public void placeRobber(Long gameId, int q, int r) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+
+        Hex hex = game.getBoard().getHex(q, r);
+
+        if (hex == null) {
+            throw new IllegalStateException("Hex with ID " + q + " not found");
+        }
+
+        if (hex.equals(game.getRobberHex())) {
+            throw new IllegalStateException("Robber is already placed on this hex");
+        }
+
+        game.setRobberHex(hex);
+        game.setIsRobberPlaced(true);
+        gameWebSocketHandler.notifyAboutFetchingRobber();
+    }
+
+
+    public Hex getRobber(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+        return game.getRobberHex();
+    }
+
+    public Boolean getIsRobberPlaced(Long gameId) {
+        Game game = getGameById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
+        return game.getIsRobberPlaced();
     }
 }
 

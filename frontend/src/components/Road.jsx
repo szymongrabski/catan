@@ -3,12 +3,12 @@ import React from 'react';
 const Road = ({ road, calculateVertexPosition, color }) => {
     const [midX, midY] = calculateMidpoint(road.startVertex, road.endVertex, calculateVertexPosition);
 
-    const rectWidth = 80;
+    const rectWidth = 60;
     const rectHeight = 10;
 
     const angle = calculateAngle(road.startVertex, road.endVertex, calculateVertexPosition);
 
-    const rectX = midX - rectWidth / 2 + 5;
+    const rectX = midX - rectWidth / 2 ;
     const rectY = midY - rectHeight / 2;
 
     return (

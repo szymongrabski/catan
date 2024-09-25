@@ -20,7 +20,8 @@ export const GameProvider = ({ children }) => {
     const [availableRoads, setAvailableRoads] = useState([]);
     const [gameRound, setGameRound] = useState(0);
     const [diceNumber, setDiceNumber] = useState(0);
-
+    const [robberHex, setRobberHex] = useState(null);
+    const [isRobberPlaced, setIsRobberPlaced] = useState(false);
 
     const fetchPlayer = async () => {
         if (!gameId) return;
@@ -29,6 +30,16 @@ export const GameProvider = ({ children }) => {
             setPlayer(response);
         } catch (err) {
             setError('Failed to fetch player data');
+        }
+    }
+
+    const fetchIsRobberPlaced = async () => {
+        if (!gameId) return;
+        try {
+            const response = await fetchData(`game/${gameId}/robber/is`);
+            setIsRobberPlaced(response)
+        } catch (err) {
+            setError('Failed to fetch isRobberPlaced');
         }
     }
 
@@ -68,6 +79,11 @@ export const GameProvider = ({ children }) => {
         setSettlements(response);
     }
 
+    const fetchRobberHex = async (gameId) => {
+        const response = await fetchData(`game/${gameId}/robber`);
+        setRobberHex(response);
+    }
+
     const fetchRoads = async (gameId) => {
         const response = await fetchData(`game/${gameId}/roads`);
         setRoads(response);
@@ -105,6 +121,8 @@ export const GameProvider = ({ children }) => {
                 fetchGameRound(),
                 fetchCurrentPlayerIndex(),
                 fetchDiceNumber(),
+                fetchRobberHex(gameId),
+                fetchIsRobberPlaced()
             ]);
         } catch (err) {
             setError('Failed to fetch game data');
@@ -144,6 +162,11 @@ export const GameProvider = ({ children }) => {
                     fetchGameRound();
                 } else if (event.data === 'fetch-dice-number') {
                     fetchDiceNumber();
+                } else if (event.data === 'fetch-robber') {
+                    fetchRobberHex(gameId);
+                    fetchIsRobberPlaced();
+                } else if (event.data === 'fetch-is-robber-placed') {
+                    fetchIsRobberPlaced();
                 }
             };
 
@@ -160,7 +183,7 @@ export const GameProvider = ({ children }) => {
     }, [player]);
 
     return (
-        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads, gameRound, diceNumber}}>
+        <GameContext.Provider value={{gameId, socket, setGameId, player, players, loading, error, board, setError, isReady, fetchPlayer, setIsReady, fetchBoard, currentPlayerIndex, fetchCurrentPlayerIndex, isPlayersTurn, settlements, roads, availableRoads, fetchAvailableRoads, gameRound, diceNumber, robberHex, isRobberPlaced}}>
             { children }
         </GameContext.Provider>
     );

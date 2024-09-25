@@ -35,9 +35,7 @@ const SevenModal = ({ isOpen, onRequestClose, player, gameId }) => {
     }, [player]);
 
     const onSubmit = async () => {
-        console.log(resourcesToGive)
         const response = await substractResources(gameId, player.id, resourcesToGive);
-        console.log(response)
     }
 
     const handleResourceChange = (resource, amount) => {

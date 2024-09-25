@@ -1,6 +1,7 @@
 package com.example.backend.gameDetails.game;
 
 import com.example.backend.gameDetails.board.Board;
+import com.example.backend.gameDetails.board.Hex.Hex;
 import com.example.backend.gameDetails.board.Hex.HexType;
 import com.example.backend.gameDetails.board.Road.Road;
 import com.example.backend.gameDetails.board.Vertex.Vertex;
@@ -201,5 +202,29 @@ public class GameController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PatchMapping("/{gameId}/robber")
+    public ResponseEntity<Void> placeRobber(@PathVariable Long gameId,
+                                            @RequestBody Map<String, Integer> coordinates) {
+        try {
+            int q = coordinates.get("q");
+            int r = coordinates.get("r");
+
+            gameService.placeRobber(gameId, q, r);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{gameId}/robber")
+    public ResponseEntity<Hex> getHexRobber(@PathVariable Long gameId) {
+        return ResponseEntity.ok(gameService.getRobber(gameId));
+    }
+
+    @GetMapping("/{gameId}/robber/is")
+    public ResponseEntity<Boolean> getIsRobberPlaced(@PathVariable Long gameId) {
+        return ResponseEntity.ok(gameService.getIsRobberPlaced(gameId));
     }
 }
